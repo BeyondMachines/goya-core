@@ -1,3 +1,6 @@
+# Project specific ignore parameters - local data store
+local_data_store/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
