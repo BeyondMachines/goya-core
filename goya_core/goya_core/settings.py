@@ -74,6 +74,8 @@ INSTALLED_APPS = [
 
     # goya apps
     'main',
+    'content',
+    'slack_app',
 
     # third party tools
     'bootstrap5',
