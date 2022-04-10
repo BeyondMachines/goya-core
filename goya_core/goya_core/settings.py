@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 from pathlib import Path
 import os  # needed to check for the AWS_REGION parameter.
 import boto3  # needed to connect to AWS.
-import botocore # needed to connect to AWS.
+import botocore  # needed to connect to AWS.
 
 
 # This function is used to pull the AWS SSM parameters needed to configure this program to run in AWS.
@@ -33,7 +33,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 LOCAL_DATA_STORE = Path(__file__).resolve().parent.parent.parent / 'local_data_store'
 
 # Decide if the program is running in local copy or on AWS (looks for "AWS REGION" string) and set parameters for the rest of the setup.
-if os.environ.get('AWS_REGION'): # Check whether AWS_REGION variable exists to see if running in AWS or locally
+if os.environ.get('AWS_REGION'):  # Check whether AWS_REGION variable exists to see if running in AWS or locally
     LOCAL_TEST = False
     DEBUG = os.environ.get('DJANGO_DEBUG', False)
 else:
@@ -45,7 +45,7 @@ else:
 
 # Creation of SECRET_KEY - this key is needed to generate all CSRF protection codes. This code should never be visible and should be frequently rotated.
 # SECURITY WARNING: keep the secret key used in production secret! The commented string version is most insecure
-# SECRET_KEY = 'some-secret-string-s#37m%3#0=o%pvvj+mptv+2k&w_@8^o7vt-y$ef&5pvd%yhdgm' 
+# SECRET_KEY = 'some-secret-string-s#37m%3#0=o%pvvj+mptv+2k&w_@8^o7vt-y$ef&5pvd%yhdgm'
 # The code below loads the SECRET_KEY from the local data store or from AWS Parameter Store (depending on whether the environment is detected to be local or remote).
 
 if str(LOCAL_TEST) == 'True':
@@ -57,7 +57,6 @@ else:
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
 ALLOWED_HOSTS = []
 
@@ -122,7 +121,7 @@ if str(LOCAL_TEST) == 'True':
             'NAME': LOCAL_DATA_STORE / 'db.sqlite3',
         }
     }
-else:  #read from AWS Parameter store environment variables
+else:  # read from AWS Parameter store environment variables
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -133,8 +132,6 @@ else:  #read from AWS Parameter store environment variables
             'PORT': '5432',
         }
     }
-
-
 
 
 # Password validation
