@@ -39,3 +39,4 @@ In the commit message and in the Pull Request description summarize the type of 
 `test:` Everything related to testing
 `docs:` Everything related to documentation
 `chore:` Regular code maintenance
+`security:` Updates specific to security
