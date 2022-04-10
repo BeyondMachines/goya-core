@@ -5,6 +5,7 @@ boto3==1.21.37
 botocore==1.24.37
 Django==4.0.3
 django-bootstrap-v5==1.0.11
+docutils==0.18.1
 flake8==4.0.1
 jmespath==1.0.0
 mccabe==0.6.1
