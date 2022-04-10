@@ -49,6 +49,24 @@ Go to the `goya_core` folder (example: `Initial path/goya/goya-core/goya_core`) 
 python manage.py runserver
 ```
 
+## How to run goya-core app in a Docker container
+1. Go to the `goya_core` folder (example: `Initial path/goya/goya-core/`) and build the image using the command docker build
+```
+docker build .
+```
+2. Run the Docker container using the command docker-compose up
+
+```
+docker-compose up
+```
+
+That's it. 
+
+To create a superuser account instead of typing python manage.py createsuperuser the updated command would now look like 
+```
+docker-compose exec web python manage.py createsuperuser
+```
+
 ## How to update your local copy of goya-core
 1. Pull new version of the code while in the goya folder `goya-core`
 ```
