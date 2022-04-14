@@ -14,6 +14,7 @@ from pathlib import Path
 import os  # needed to check for the AWS_REGION parameter.
 import boto3  # needed to connect to AWS.
 import botocore  # needed to connect to AWS.
+from dotenv import load_dotenv  # needed to load content from .env files
 
 
 # This function is used to pull the AWS SSM parameters needed to configure this program to run in AWS.
@@ -39,6 +40,12 @@ if os.environ.get('AWS_REGION'):  # Check whether AWS_REGION variable exists to 
 else:
     LOCAL_TEST = True
     DEBUG = os.getenv('DJANGO_DEBUG', True)
+    env_path = LOCAL_DATA_STORE / '.env'  # define the path of the .env 
+    load_dotenv(dotenv_path=env_path)  # load the environment file .env
+    SLACK_CLIENT_SECRET = os.environ["SLACK_CLIENT_SECRET"]  # the secret issued to our App
+    SLACK_CLIENT_ID = os.environ["SLACK_CLIENT_ID"]  # the ID issued to our app
+    SLACK_REDIRECT_URI= os.environ["SLACK_REDIRECT_URL"]  # the redirect URL set up in our app that the user will be redirected after the initial setup.
+    STATE_DB_NAME = LOCAL_DATA_STORE / 'state_store.sqlite3'  # the database which keeps the Oauth request states for a local installation
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
