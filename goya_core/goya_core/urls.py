@@ -16,11 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from main.views import home_view
-from slack_app.views import slack_install_view
+from slack_app.views import slack_install_view, slack_callback_view
 
 urlpatterns = [
     path('admin/doc/', include('django.contrib.admindocs.urls')),
     path('admin/', admin.site.urls),
     path('', home_view, name='home'),
-    path('slack/install/', slack_install_view, name='slack_install'),
+    path('slack/install', slack_install_view, name='slack_install'),
+    path('slack/oauth/callback', slack_callback_view, name='slack_callback'),
 ]
