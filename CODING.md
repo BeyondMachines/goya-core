@@ -30,6 +30,14 @@ If you do that it's impossible for people to properly review what you did.
 ### Always commit only the file(s) needed for the code change
 Never use `git add .` to a commit. Only commit the files that you changed for a particular effort.
 
+### Clean up development branches after merging to master/main
+To clean up the branches delete the remote branch after merging to master/main.
+From time to time clean up your local development branches using the following code (checks which remotes are deleted and deletes the local copy)
+```
+git fetch --all --prune; git branch -vv | awk '/: gone]/{print $1}' | xargs git branch -D;
+```
+
+
 ### Make it easy for people to understand what you did
 In the commit message and in the Pull Request description summarize the type of commit.
 `feat:` The new feature you're adding to a particular application

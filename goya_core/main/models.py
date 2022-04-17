@@ -2,6 +2,7 @@ import string
 from datetime import date, datetime
 from slugify import slugify
 from django.db import models
+import random
 
 # Create your models here.
 
@@ -13,6 +14,7 @@ class SlackInstalledWorkspace(models.Model):  # this is a generic challenge mode
     enterprise_id = models.CharField(max_length=50, blank=False, null=False)
     is_enterprise_install = models.BooleanField(blank=True, null=True)  # the slug text for the url
     workspace_id = models.CharField(max_length=50, blank=False, null=False)
+    workspace_slack_url = models.URLField(max_length=200, blank=False, null=False)
     admin_user_id = models.CharField(max_length=50, blank=False, null=False)
     admin_user_name = models.CharField(max_length=200, blank=False, null=False)
     admin_user_email = models.EmailField(blank=True, null=False)
