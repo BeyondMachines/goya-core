@@ -25,10 +25,19 @@ Read the architecture, coding standard and security concepts first. Install the 
 ## goya_core 
 The **goya_core** folder is the project source code
 The project is based on Django.
+More details of the content of the `goya_core` in the README file in the folder.
 
 ## local_data_store
 The **local_data_store** folder contains all local data stores, that shouldn't be included in the source code. Anything stored in this folder is ignored via the _.gitignore_ and _.dockerignore_ files.
-
+### .env file
+You need to create your own .env file in the `local_data_store` that will contain your apps config (example below)
+```
+SLACK_TOKEN=your_app_token_secret
+SLACK_CLIENT_ID=your_app_id
+SLACK_CLIENT_SECRET=your_app_secret
+SLACK_SIGNING_SECRET=your_app_signing_secret
+SLACK_REDIRECT_URL=https://some_url_you_chose/slack/oauth/callback
+```
 # Roadmap
 - Implement a content server (django)
     - Backend entry of content

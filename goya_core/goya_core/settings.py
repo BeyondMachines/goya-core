@@ -37,6 +37,7 @@ LOCAL_DATA_STORE = Path(__file__).resolve().parent.parent.parent / 'local_data_s
 if os.environ.get('AWS_REGION'):  # Check whether AWS_REGION variable exists to see if running in AWS or locally
     LOCAL_TEST = False
     DEBUG = os.environ.get('DJANGO_DEBUG', False)
+    ALLOWED_HOSTS = []
 else:
     LOCAL_TEST = True
     DEBUG = os.getenv('DJANGO_DEBUG', True)
@@ -46,6 +47,7 @@ else:
     SLACK_CLIENT_ID = os.environ["SLACK_CLIENT_ID"]  # the ID issued to our app
     SLACK_REDIRECT_URI= os.environ["SLACK_REDIRECT_URL"]  # the redirect URL set up in our app that the user will be redirected after the initial setup.
     STATE_DB_NAME = LOCAL_DATA_STORE / 'state_store.sqlite3'  # the database which keeps the Oauth request states for a local installation
+    ALLOWED_HOSTS = ['*']  # when running on localhost to allow extenal proxy connections
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
@@ -65,7 +67,7 @@ else:
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = [] the allowed hosts are in the setup above
 
 
 # Application definition
