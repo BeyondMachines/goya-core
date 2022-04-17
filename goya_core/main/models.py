@@ -21,13 +21,11 @@ class SlackInstalledWorkspace(models.Model):  # this is a generic challenge mode
     class Meta:
         unique_together = ('enterprise_id', 'workspace_id')  # block duplicating of workspace records
 
-
     def __str__(self):
         return self.workspace_name
 
     def title_no_spaces(self):
         return re.sub('[^a-zA-Z0-9]', '_', self.workspace_name)  # use regex to replace anything non alphanumeric with underscore
-        #  return self.challenge_title.replace(" ", "_")
 
     def save(self, *args, **kwargs):  # the autogeneration of the slug for the challenge
         if not self.workspace_url:
