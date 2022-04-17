@@ -47,10 +47,11 @@ def slack_install_view(request, *args, **kwargs):
 
 @require_http_methods(["GET"])
 def slack_callback_view(request, *args, **kwargs):
+    '''
+    This is the view that completes the installation of the provides the install page where the users will click on the installation of the application. 
+    this may need to be changed later to make it simpler for users to find and use this app (maybe put it on the home page
+    '''
     # Retrieve the auth code and state from the request params
-    print(request)
-    print(request.GET.get('code'))
-    print(request.GET.get('state'))
     if request.GET.get('code'):
         # Verify the state parameter
         state_store = SQLite3OAuthStateStore(
@@ -130,7 +131,30 @@ def slack_callback_view(request, *args, **kwargs):
                 is_enterprise_install=is_enterprise_install,
                 token_type=oauth_response.get("token_type"),
             )
-            print(installation)
+            # testing the identification of the details that are needed: Workspace ID, Workspace domain, Workspace Name, Installer user ID, installer user email, installer user name. 
+            print(oauth_response)
+            print('installed enterprise',installed_enterprise)
+            print('installed enterprise',is_enterprise_install)
+            print('url',oauth_response.get("url"))
+            print('url 1', auth_test.get("url"))
+            print('team',installed_team)
+            print('installer',installer)
+            print('installer_id',installer.get("id"))
+            print('installer email', installer.get("email"))
+            print('installer user', installer.get("user"))
+            print('installer user from auth_test', auth_test.get("user"))
+
+            ## This block is the one that exposes the installing user 
+            client = WebClient(token=installer.get("access_token"))  # this requiest works only with the user access token, not the bot token.
+            user = client.users_identity()
+            user_details = user.get("user")
+            team_details = user.get("team")
+            print('slack workspace id',team_details.get("id"))
+            print('user name',user_details.get("name"))
+            print('user id',user_details.get("id"))
+            print('user email',user_details.get("email"))
+
+
 
             # Store the installation
             installation_store.save(installation)
@@ -139,7 +163,7 @@ def slack_callback_view(request, *args, **kwargs):
             return HttpResponse("Thanks for installing this app!")
         else:
             
-            return HttpResponseBadRequest("Try the installation again (the state value is already expired)")
+            return HttpResponseBadRequest("Error: The state value is expired. Start the installation again and complete it within 5 minutes of starting.")
     else:
         error = args["error"] if "error" in args else "no error message available"
         return HttpResponseBadRequest("Something is wrong with the installation (Error message: "+error+")")
