@@ -17,6 +17,8 @@ The coding standard of this project is defined in the file `CODING.md` in this f
 The architecture of this project is defined in the file `ARCHITECTURE.md` in this folder.
 ## Security 
 The security concepts of this project is defined in the file `SECURITY.md` in this folder.
+## AWS Setup 
+The configuration of AWS to run the project on AWS is defined in the file `AWS_SETUP.md` in this folder
 
 # Contributing to the project
 Read the architecture, coding standard and security concepts first. Install the application and start adding features. In order to push to the code you have to be added to the project first. 

@@ -23,6 +23,11 @@
 ## Content Sanitization
 - Content will be sanitized via libraries which eliminate malicious content before it reaches the content consumer.
 
+## AWS Setup
+The AWS setup needs to conform to the following criteria
+- Minimal privileges
+- Properly secured components (both services and database)
+
 ## To be defined
 - Privacy
 - Vulnerability Scanning
