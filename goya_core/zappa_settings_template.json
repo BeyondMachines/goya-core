@@ -13,6 +13,8 @@
             "SubnetIds": [ "VPC_private_subnet-1", "VPC_private_subnet-2" ], 
             "SecurityGroupIds": [ "VPC_default_security_group" ]
         },
-        "xray_tracing": false
+        "xray_tracing": false,
+        "certificate_arn": "arn_of_the_certificate_you_created_in_AWS_Certificate_Manager",
+        "domain": "your_custom_domain"
     }
 }

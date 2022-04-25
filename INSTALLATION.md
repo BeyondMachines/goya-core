@@ -7,13 +7,22 @@
 * [How to run goya-core app in a Docker container](#Howtorungoya-coreappinaDockercontainer)
 * [How to update your local copy of goya-core](#Howtoupdateyourlocalcopyofgoya-core)
 * [How to install production grade goya-core in AWS.](#Howtoinstallproductiongradegoya-coreinAWS.)
-	* [Components and ingredients](#Componentsandingredients)
+	* [Django Setup](#DjangoSetup)
+		* [Static files basic concepts](#Staticfilesbasicconcepts)
+		* [STATICFILES_DIRS structure](#STATICFILES_DIRSstructure)
+		* [Using static files](#Usingstaticfiles)
+		* [Placing static files to S3 bucket](#PlacingstaticfilestoS3bucket)
+		* [Install django-storages](#Installdjango-storages)
+		* [Copy files to the S3 bucket](#CopyfilestotheS3bucket)
+	* [AWS Setup Components and ingredients](#AWSSetupComponentsandingredients)
 	* [Details on the ingredients](#Detailsontheingredients)
 	* [AWS Installation](#AWSInstallation)
 		* [Create deployoment and running credentials](#Createdeployomentandrunningcredentials)
 		* [Create a VPC](#CreateaVPC)
 		* [Create needed S3 buckets](#CreateneededS3buckets)
 		* [Create RDS DB](#CreateRDSDB)
+		* [S3 Static files setup](#S3Staticfilessetup)
+		* [Create a CloudFront distribution for static files](#CreateaCloudFrontdistributionforstaticfiles)
 		* [Insert parameters in AWS Systems Manager Parameter Store.](#InsertparametersinAWSSystemsManagerParameterStore.)
 	* [Configure the zappa_settings.json](#Configurethezappa_settings.json)
 		* [Set up VPC](#SetupVPC)
@@ -106,7 +115,45 @@ pip install -r requirements.txt
 ```
 
 ## <a name='Howtoinstallproductiongradegoya-coreinAWS.'></a>How to install production grade goya-core in AWS. 
-### <a name='Componentsandingredients'></a>Components and ingredients 
+
+### <a name='DjangoSetup'></a>Django Setup
+#### <a name='Staticfilesbasicconcepts'></a>Static files basic concepts
+* STATICFILES_DIRS  - the paths where the static files are placed during development so they can be collected into the STATIC_ROOT during the `python manage.py collectstatic`
+For our implementation the STATICFILES_DIRS is `static_data` in the root of the code folder.
+
+* STATIC_ROOT - The absolute path to the directory where collectstatic will collect static files for deployment.
+For our implementation the local version of STATIC_ROOT is `static_assets` in the root of the code folder.
+
+* STATIC_URL - URL to use when referring to static files located in STATIC_ROOT.
+    default: None
+    Example: "/static/" or "http://static.example.com/"
+
+#### <a name='STATICFILES_DIRSstructure'></a>STATICFILES_DIRS structure
+The structure of the STATICFILES_DIRS is as follows. Put all relevant files in the appropriate subfolders. They will be replicated during the python manage.py collectstatic.
+
+|- STATICFILES_DIRS  
+|   |- js  
+|   |- img  
+|   |- css  
+
+#### <a name='Usingstaticfiles'></a>Using static files
+Add all static files during development into the STATICFILES_DIRS folder. That folder IS part of the code and must be included in the repo. 
+The STATIC_ROOT is populated from STATICFILES_DIRS using  `python manage.py collectstatic`. This folder IS NOT part of the source code and shouldn't be included in the repo.
+Please note that `collectstatic` will only collect and populate folders which are not empty.
+
+#### <a name='PlacingstaticfilestoS3bucket'></a>Placing static files to S3 bucket
+While there are automated mechanisms for pushing the staticfiles to an S3 bucket, for small implementations and for rare changes of the static files you can upload manually. 
+This is done to reduce costs, since S3 charges for uploads when they are frequent.
+Just upload the STATIC_ROOT content to the root of the S3 bucket, and subsequently upload changed pieces one by one. 
+
+#### <a name='Installdjango-storages'></a>Install django-storages
+`pip install django-storages` to install django storages. 
+Add the `'storages'` line to the `settings.py` file under `INSTALLED_APPS`
+Add the configuration for the AWS parameters - docs here: https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html
+
+#### <a name='CopyfilestotheS3bucket'></a>Copy files to the S3 bucket 
+Copy the content of the local STATIC_ROOT folder to the S3 bucket and check if they are visible via the URL of the CDN.
+### <a name='AWSSetupComponentsandingredients'></a>AWS Setup Components and ingredients 
 - The Django application (folder `goya_core`)
 - AWS Account with credentials that can run VPC, RDS, S3, API Gateway, Lambda, Route53, Nat Gateway, Internet Gateway, IAM. 
 - Appropriate credentials set up on the AWS Account (see recipe below)
@@ -154,7 +201,7 @@ Create AWS VPC in the selected region. Configure the VPC wizard to create:
 
 #### <a name='CreateneededS3buckets'></a>Create needed S3 buckets
 Create S3 buckets for the: 
-- static files of Django
+- Static files of Django - IMPORTANT - CAN'T be Encrupted using KMS because then it can't serve to public (non-IAM) users
 - Zappa scripted deployment
 - Slack workspaces repository
 - Slack session repository.
@@ -180,6 +227,58 @@ ALTER ROLE db_user SET default_transaction_isolation TO 'read committed';
 ALTER ROLE db_user SET timezone TO 'UTC';
 GRANT ALL PRIVILEGES ON DATABASE db_name TO db_user;
 ```
+
+
+#### <a name='S3Staticfilessetup'></a>S3 Static files setup
+
+##### Create an S3 Bucket or use the one previously created
+Use the bucket for static files of Django created above in the creation of the S3 bucket
+```
+Block all public access
+Bucket Versioning - Disable
+Server-side encryption: Disabled
+(Advanced) Object Lock: Disable
+```
+
+Add CORS policy to allow for public access to the bucket for static fu
+```
+[
+    {
+        "AllowedHeaders": [],
+        "AllowedMethods": [
+            "GET"
+        ],
+        "AllowedOrigins": [
+            "*"
+        ],
+        "ExposeHeaders": []
+    }
+]
+```
+#### Create a Certificate for the public websites.
+Select us-east-1 (N.Virginia) region and  Go to Amazon Certificate Manager (ACN)
+Create a wildcard certificate for your domain (this will be used for the CDN public alias and for the application url alias)
+
+#### <a name='CreateaCloudFrontdistributionforstaticfiles'></a>Create a CloudFront distribution for static files
+Create a new cloudfront distribution with the following setup
+```
+Origin domain: name_of_the_S3_for_static_Django_files.s3.region_id.amazonaws.com
+Name: name_of_the_S3_for_static_Django_files.s3.region_id.amazonaws.com
+S3 bucket access: Yes use OAI (bucket can restrict access to only CloudFront
+Origin access identity: 
+Bucket policy: Yes, update the bucket policy
+Enable Origin Shield: No
+Distribution url: url_created_by_cloudfront.cloudfront.net
+Distribution cname: name_of_cdn_alias.your_domain.your_tld
+Compress by default
+Viewer protocol policy: Redirect http to https
+Allowed HTTP methods: GET, HEAD
+Restrict viewer access: No
+Cache policy and origin request policy: CachingOptimized
+Connect the certificate created above. 
+```
+Manually Create a cname record in the Route53 for `name_of_cdn_alias.your_domain.your_tld` to point to `url_created_by_cloudfront.cloudfront.net`
+
 #### <a name='InsertparametersinAWSSystemsManagerParameterStore.'></a>Insert parameters in AWS Systems Manager Parameter Store.
 Important information needs to be well protected. The Django app looks for the important information (credentials and URLs) in the AWS SSM Parameter Store. Create encrypted string records for:
 - RDS DB Name
@@ -205,6 +304,19 @@ Then grant the Zappa role proper permissions to access that information by updat
             ]
         },
 ```
+#### Create alias for API Gateway
+Go to the API Gateway and create a custom domain name. Select Edge as the type of configuration, and select the certificate you created in the ACM above.
+Manally create the CNAME record in Route53 for the custom domain name to point to the API gateway name displayed in the API Gateay configuration.
+
+#### Certify the custom domain name
+Add the following configuration to the `zappa_settings.json`:
+
+Also, add the custom domain to the ALLOWED_HOSTS in the `goya_core/goya_core/settings.py`
+Then execute (assuming the name is `production`):
+- `zappa deploy production`
+- `zappa certify production`
+
+[Alternative options for creating a custom domain for your zappa deployment can be found here](https://romandc.com/zappa-django-guide/walk_domain/)
 
 ### <a name='Configurethezappa_settings.json'></a>Configure the zappa_settings.json
 #### <a name='SetupVPC'></a>Set up VPC

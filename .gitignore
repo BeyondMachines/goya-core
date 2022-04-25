@@ -1,6 +1,12 @@
 # Project specific ignore parameters - local data store
 local_data_store/
 
+# The local static files created during developmeny. 
+static_data/
+
+# The local static files populated during collectstatic. 
+static_assets/
+
 # Zappa packages
 zappa_settings.json*
 goya*.zip
