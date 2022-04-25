@@ -1,6 +1,11 @@
 # Project specific ignore parameters - local data store
 local_data_store/
 
+# Zappa packages
+zappa_settings.json*
+goya*.zip
+goya-core-production*.zip
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
