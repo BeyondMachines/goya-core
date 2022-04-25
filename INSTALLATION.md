@@ -187,6 +187,7 @@ Important information needs to be well protected. The Django app looks for the i
 - RDS DB Username
 - RDS DB Password
 - Django Secret
+- API gateway (for allowed hosts)
 - Slack Bot ID
 - Slack Bot Access Code
 - Slack Bot Secret Code

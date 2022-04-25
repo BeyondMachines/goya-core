@@ -37,7 +37,10 @@ LOCAL_DATA_STORE = Path(__file__).resolve().parent.parent.parent / 'local_data_s
 if os.environ.get('AWS_REGION'):  # Check whether AWS_REGION variable exists to see if running in AWS or locally
     LOCAL_TEST = False
     DEBUG = os.environ.get('DJANGO_DEBUG', False)
-    ALLOWED_HOSTS = []
+    hosts = []  # the following code populates the ALLOWED_HOSTS starting from an empty list.
+    api_gatway = get_ssm_key('GOYA_API_GATEWAY')
+    hosts.append(api_gatway)
+    ALLOWED_HOSTS = hosts
 else:
     LOCAL_TEST = True
     DEBUG = os.getenv('DJANGO_DEBUG', True)
@@ -62,7 +65,7 @@ if str(LOCAL_TEST) == 'True':
     with open(SECRET_FILE) as f:
         SECRET_KEY = f.read().strip()
 else:
-    SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
+    SECRET_KEY = get_ssm_key('GOYA_DJANGO_SECRET_KEY')
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -137,10 +140,10 @@ else:  # read from AWS Parameter store environment variables
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': get_ssm_key('CODEFOX_TEST_POSTGRES_DB'),
-            'USER': get_ssm_key('CODEFOX_TEST_POSTGRES_USER'),
-            'PASSWORD': get_ssm_key('CODEFOX_TEST_POSTGRES_PASSWORD'),
-            'HOST': get_ssm_key('CODEFOX_TEST_POSTGRES_HOST'),
+            'NAME': get_ssm_key('GOYA_DJANGO_POSTGRES_DB'),
+            'USER': get_ssm_key('GOYA_DJANGO_POSTGRES_USER'),
+            'PASSWORD': get_ssm_key('GOYA_DJANGO_POSTGRES_PASSWORD'),
+            'HOST': get_ssm_key('GOYA_DJANGO_POSTGRES_HOST'),
             'PORT': '5432',
         }
     }

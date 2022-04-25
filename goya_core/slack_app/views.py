@@ -11,9 +11,12 @@ import boto3
 import os
 from slack_sdk.web import WebClient
 from django.http import HttpResponseBadRequest, HttpResponse
+from django.contrib.auth.decorators import login_required
+
 
 
 from main.models import SlackInstalledWorkspace
+from content.models import Advisory
 
 # Create your views here.
 
@@ -37,7 +40,6 @@ def slack_install_view(request, *args, **kwargs):
     authorize_url_generator = AuthorizeUrlGenerator(client_id=str(settings.SLACK_CLIENT_ID),scopes=["chat:write","team:read"],user_scopes=["identity.basic","identity.email"],)  # this version is not elegant, there is no central management of scopes but for MVP good enough. 
     state = state_store.issue()  # we issue a temporary state variable to be used in the request so the link can't be recycled 
     generated_url = authorize_url_generator.generate(state)
-    print(generated_url)
     context = {
         'generated_url': generated_url,
     }
@@ -77,13 +79,21 @@ def slack_callback_view(request, *args, **kwargs):
                 code=request.GET.get('code')
             )
 
+            # Now we collect some basic information from the oauth_token
+            is_enterprise_install = oauth_response.get("is_enterprise_install")
+
+            # now we have to get the information. First from the bot auth request
+            installed_enterprise = oauth_response.get("enterprise", {})
+            installer = oauth_response.get("authed_user", {})  # this is an interim block to get the subarray
+            installed_team = oauth_response.get("team", {})  # this is a interim block to get the subarray
+            installed_workspace_name = installed_team.get("name")
+            installed_workspace_id = installed_team.get("id")
+            incoming_webhook = oauth_response.get("incoming_webhook", {})
+
             # Now we prepare the auth_test to confirm the proper authentication
             bot_token = oauth_response.get("access_token")
             client = WebClient(token=bot_token) #create an OAuth client with a bot taccess token
-            is_enterprise_install = oauth_response.get("is_enterprise_install")
-
-            # NOTE: oauth.v2.access doesn't include bot_id in response
-            bot_id = None
+            bot_id = None  # NOTE: oauth.v2.access doesn't include bot_id in response
             enterprise_url = None
             if bot_token is not None:
                 auth_test = client.auth_test(token=bot_token)
@@ -97,13 +107,7 @@ def slack_callback_view(request, *args, **kwargs):
                     enterprise_id = 'No_Ent_ID'
                     enterprise_name = 'No_Ent_Name'
 
-            # now we have to get the information. First from the bot auth request
-            installed_enterprise = oauth_response.get("enterprise", {})
-            installer = oauth_response.get("authed_user", {})  # this is an interim block to get the subarray
-            installed_team = oauth_response.get("team", {})  # this is a interim block to get the subarray
-            installed_workspace_name = installed_team.get("name")
-            installed_workspace_id = installed_team.get("id")
-            incoming_webhook = oauth_response.get("incoming_webhook", {})
+
             # now we get the information from the user access token, to get the user details
             client = WebClient(token=installer.get("access_token"))
             user = client.users_identity()
@@ -176,6 +180,7 @@ def slack_callback_view(request, *args, **kwargs):
         error = args["error"] if "error" in args else "no error message available"
         return HttpResponseBadRequest("Something is wrong with the installation (Error message: "+error+")")
 
+@login_required  # the message is protected. 
 @require_http_methods(["GET"])
 def test_message_view(request, *args, **kwargs):
 
@@ -194,11 +199,18 @@ def test_message_view(request, *args, **kwargs):
             client_id=client_id
         )
     all_workspaces = SlackInstalledWorkspace.objects.all()
+    all_advisories = Advisory.objects.all()
+
     for workspace in all_workspaces:
         print(workspace)
         installation = installation_store.find_installation(enterprise_id=workspace.enterprise_id,team_id=workspace.workspace_id)
         client = WebClient(token=installation.bot_token)
-        result = client.chat_postMessage(channel='#general', text='test Oauth message after installation and getting the token from local install.')
+        spacer_line = "===================================="
+        message_text=""
+        for advisory in all_advisories:
+            message_text = "*"+advisory.advisory_title+"*" + "\n" + spacer_line + "\n" + advisory.advisory_details + "\n\n"
+        result = client.chat_postMessage(channel='#general', text=message_text)
+        status_result = client.chat_postMessage(channel=installation.user_id, text="<@"+installation.user_id+">"+":wave: i sent a message")  # this line sends the status message to the admin user to remind him if everything is OK. The important part is 
 
         print(result)
     return HttpResponse("Test completed! Result: "+result.http_verb)
