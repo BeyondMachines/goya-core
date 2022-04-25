@@ -37,10 +37,11 @@ LOCAL_DATA_STORE = Path(__file__).resolve().parent.parent.parent / 'local_data_s
 if os.environ.get('AWS_REGION'):  # Check whether AWS_REGION variable exists to see if running in AWS or locally
     LOCAL_TEST = False
     DEBUG = os.environ.get('DJANGO_DEBUG', False)
-    hosts = []  # the following code populates the ALLOWED_HOSTS starting from an empty list.
+    hosts = ['app.beyondmachines.net']  # the following code populates the ALLOWED_HOSTS starting from an empty list.
     api_gatway = get_ssm_key('GOYA_API_GATEWAY')
     hosts.append(api_gatway)
     ALLOWED_HOSTS = hosts
+    USE_S3 = True  # tell the static file setup to look for the S3 version of static files
 else:
     LOCAL_TEST = True
     DEBUG = os.getenv('DJANGO_DEBUG', True)
@@ -51,6 +52,8 @@ else:
     SLACK_REDIRECT_URI= os.environ["SLACK_REDIRECT_URL"]  # the redirect URL set up in our app that the user will be redirected after the initial setup.
     STATE_DB_NAME = LOCAL_DATA_STORE / 'state_store.sqlite3'  # the database which keeps the Oauth request states for a local installation
     ALLOWED_HOSTS = ['*']  # when running on localhost to allow extenal proxy connections
+    USE_S3 = False  # tell the static file setup not to look for the S3 version of static files
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
@@ -91,6 +94,7 @@ INSTALLED_APPS = [
 
     # third party tools
     'bootstrap5',
+    'storages',  # needed for the django s3 static files
 
 ]
 
@@ -183,7 +187,45 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
-STATIC_URL = 'static/'
+# STATIC_URL = 'static/'
+
+
+# STATIC_URL = '/static/'
+
+
+if str(LOCAL_TEST) == 'True':
+    STATIC_FILE_PATH = BASE_DIR
+    STATIC_ROOT = os.path.join(STATIC_FILE_PATH, 'static_assets/')
+    STATIC_URL = 'static/'
+else:  # important, the below code is not finished yet!
+    if str(USE_S3) == 'True':
+        AWS_STORAGE_BUCKET_NAME = get_ssm_key('GOYA_S3_AWS_STORAGE_BUCKET_NAME')  # get the key for API access to S3
+        # AWS_STORAGE_BUCKET_NAME = 'codeonion-static-test.s3.us-east-2.amazonaws.com'  # get the key for API access to S3
+        AWS_DEFAULT_ACL = 'public-read'
+        AWS_S3_CUSTOM_ROOT = f'{AWS_STORAGE_BUCKET_NAME}'
+        AWS_S3_CUSTOM_DOMAIN = 'pubcdn.beyondmachines.net'  # to allow for cdn use
+        AWS_S3_OBJECT_PARAMETERS = {
+            'CacheControl': 'max-age=86400'
+        }
+        AWS_IS_GZIPPED = True
+
+        # s3 static settings
+        AWS_STATIC_LOCATION = '' 
+        # STATIC_URL = 'https://%s/%s/' % (AWS_S3_ENDPOINT_URL, AWS_STATIC_LOCATION)
+        # STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_STATIC_LOCATION}/'  # setting before the CDN - keeping this as backup to use for static root
+        # STATIC_ROOT = STATIC_URL  # setting before the CDN - keeping this as backup
+        STATIC_ROOT = f'https://{AWS_S3_CUSTOM_ROOT}/{AWS_STATIC_LOCATION}/'
+        STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_STATIC_LOCATION}/'
+        STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+    else:  # this is a special case for cloud version where we need local file serving. Should not be used. 
+        STATIC_FILE_PATH = os.getenv('DJANGO_STATIC_PATH')
+        STATIC_ROOT = os.path.join(STATIC_FILE_PATH, 'static_assets/')
+        STATIC_URL = '/static/'
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static_data/')
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
