@@ -19,6 +19,9 @@ from dotenv import load_dotenv  # needed to load content from .env files
 
 # This function is used to pull the AWS SSM parameters needed to configure this program to run in AWS.
 def get_ssm_key(name):
+    '''
+    This function gets an encrypted key from AWS Systems Manager Parameter Store
+    '''
     ssm = boto3.client('ssm')
     try:
         key = ssm.get_parameter(Name=name, WithDecryption=True)
@@ -42,6 +45,9 @@ if os.environ.get('AWS_REGION'):  # Check whether AWS_REGION variable exists to 
     hosts.append(api_gatway)
     ALLOWED_HOSTS = hosts
     USE_S3 = True  # tell the static file setup to look for the S3 version of static files
+    SLACK_CLIENT_SECRET = get_ssm_key('GOYA_SLACK_CLIENT_SECRET')
+    SLACK_CLIENT_ID = get_ssm_key('GOYA_SLACK_CLIENT_ID')
+    SLACK_REDIRECT_URI = get_ssm_key('GOYA_SLACK_INSTALL_REDIRECT_URL')
 else:
     LOCAL_TEST = True
     DEBUG = os.getenv('DJANGO_DEBUG', True)

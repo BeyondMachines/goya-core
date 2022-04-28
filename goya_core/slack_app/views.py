@@ -34,17 +34,20 @@ def slack_install_view(request, *args, **kwargs):
         s3_client = boto3.client("s3")
         state_store=AmazonS3OAuthStateStore(
             s3_client=s3_client,
-            bucket_name="your-own-s3-bucket-name-for-installations",
+            bucket_name="goya-slack-state-store",
             expiration_seconds=300,  # the default value: 10 minutes
         ),
     authorize_url_generator = AuthorizeUrlGenerator(client_id=str(settings.SLACK_CLIENT_ID),scopes=["chat:write","team:read"],user_scopes=["identity.basic","identity.email"],)  # this version is not elegant, there is no central management of scopes but for MVP good enough. 
-    state = state_store.issue()  # we issue a temporary state variable to be used in the request so the link can't be recycled 
+    if type(state_store) is tuple:  # this piece of code is needed because the AmazonS3OAuthStateStore returns a tuple.
+        state_st = state_store[0]
+    else:
+        state_st = state_store
+    state = state_st.issue()  # we issue a temporary state variable to be used in the request so the link can't be recycled 
     generated_url = authorize_url_generator.generate(state)
     context = {
         'generated_url': generated_url,
     }
     return render(request, "slack_app/slack_install.html", context)
-
 
 @require_http_methods(["GET"])
 def slack_callback_view(request, *args, **kwargs):
@@ -61,12 +64,16 @@ def slack_callback_view(request, *args, **kwargs):
         s3_client = boto3.client("s3")
         state_store=AmazonS3OAuthStateStore(
             s3_client=s3_client,
-            bucket_name="your-own-s3-bucket-name-for-installations",
+            bucket_name="goya-slack-state-store",
             expiration_seconds=300,  # the default value: 10 minutes
         )
+    if type(state_store) is tuple:  # this piece of code is needed because the AmazonS3OAuthStateStore returns a tuple.
+        state_st = state_store[0]
+    else:
+        state_st = state_store
     # Then let's get the auth code for the workspace
     if request.GET.get('code'):  # Retrieve the auth code and state from the request params
-        if state_store.consume(request.GET.get('state')):  # Verify the state parameter and prepare for getting the access token.
+        if state_st.consume(request.GET.get('state')):  # Verify the state parameter and prepare for getting the access token.
             client_id=str(settings.SLACK_CLIENT_ID)
             client_secret=str(settings.SLACK_CLIENT_SECRET)
             redirect_uri=str(settings.SLACK_REDIRECT_URI)
@@ -140,10 +147,13 @@ def slack_callback_view(request, *args, **kwargs):
                     s3_client = boto3.client("s3")
                     installation_store=AmazonS3InstallationStore(
                         s3_client=s3_client,
-                        bucket_name="your-own-s3-bucket-name-for-installations",
+                        bucket_name="goya-slack-installation-store",
                         client_id=client_id
                     ),
-                    
+                    if type(installation_store) is tuple:  # this piece of code is needed because the AmazonS3InstallationStore returns a tuple.
+                        installation_st = installation_store[0]
+                    else:
+                        installation_st = installation_store
                 installation = Installation(
                     app_id=oauth_response.get("app_id"),
                     enterprise_id=enterprise_id,
@@ -167,7 +177,7 @@ def slack_callback_view(request, *args, **kwargs):
                 )
 
                 # Store the installation
-                installation_store.save(installation)
+                installation_st.save(installation)
                 # client.chat_postMessage(channel='#general', text='hello with Oauth access token authentication. second step towards token authentication. Now works only on install App action.')
 
                 return HttpResponse("Thanks for installing this app!")
@@ -195,7 +205,7 @@ def test_message_view(request, *args, **kwargs):
         s3_client = boto3.client("s3")
         installation_store=AmazonS3InstallationStore(
             s3_client=s3_client,
-            bucket_name="your-own-s3-bucket-name-for-installations",
+            bucket_name="goya-slack-installation-store",
             client_id=client_id
         )
     all_workspaces = SlackInstalledWorkspace.objects.all()
