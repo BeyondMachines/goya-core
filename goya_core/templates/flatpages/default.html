@@ -1,0 +1,30 @@
+{% load static %}
+<!DOCTYPE html>
+
+
+<!doctype  html>
+<html  lang="en">
+
+<head>
+  <title>{{ flatpage.title }}</title>
+  <link rel="shortcut icon" type="image/png" href="{% static 'images/icon/favicon.ico' %}"/>
+  <!-- triggering an asynchronous stylesheet download
+  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" media="none" onload="if(media!='all')media='all'">
+  <link rel="stylesheet" href="{% static 'css/all.min.css' %}" media="none" onload="if(media!='all')media='all'">
+  -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+
+  <!--
+  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="">
+  -->
+</head>
+
+<body>
+
+  <div class="container">
+    {{ flatpage.content }}
+  </div>
+</body>
+</html>
