@@ -1,10 +1,22 @@
-{% extends 'base.html' %}
-{% load bootstrap5 %}
+{% extends 'general/base.html' %}
+{% load static %}
 
-{% block title %}
-    django-bootstrap-v5
+{% block hero %}
+<div class="row">
+    <div class="col-12">
+        {% include 'home/hero.html' %}
+    </div>
+</div>
 {% endblock %}
 
-{% block content %}
-    This is <em>bootstrap5</em> for <strong>Django</strong>.
+{% block main %}
+<div class="row">
+    <div class="col-12">
+        {% block features %}
+            {% include 'home/features.html' %}
+        {% endblock %}
+    </div>
+</div>
+
 {% endblock %}
+

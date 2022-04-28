@@ -13,3 +13,4 @@ This is the root folder of the **goya_core** Django project.
 - `bootstrap 5` for UI (via the django-bootstrap-v5 library)
 - `Slack SDK` (via the python slack_sdk library)
 - `AWS` (via the boto3/botocore library)
+- `flatpages` from Django to build the simple static part of the application, like FAQ and Privacy pages. 
