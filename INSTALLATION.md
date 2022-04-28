@@ -287,9 +287,11 @@ Important information needs to be well protected. The Django app looks for the i
 - RDS DB Password
 - Django Secret
 - API gateway (for allowed hosts)
-- Slack Bot ID
-- Slack Bot Access Code
+- Slack Bot Token
+- Slack Bot client ID
 - Slack Bot Secret Code
+- Slack Bot Signing Secret
+- Django Slack Install Redirect URL
 
 Then grant the Zappa role proper permissions to access that information by updating the policy. 
 ```
@@ -335,6 +337,7 @@ Configure the `zappa_settings.json` file with Zappa role to be assigned to the A
 ```
 
 ### <a name='Deployupdateandmanagetheapplication'></a>Deploy, update and manage the application
+#### Deploy and undeploy
 To _deploy_ the application (assuming the name is `production`) from the `goya-core/goya_core` folder (where the `manage.py` program sits), run:
 ```
 zappa deploy production
@@ -345,11 +348,18 @@ To _update_ the code of the application with new code, (assuming the name is `pr
 zappa update production
 ```
 
+#### Execute migrations
 To execute _migrations_, it's a three step process:
 - prepare migrations locally: `python manage.py makemigrations`
 - update instance: `zappa update production`
 - execute migrations: `zappa manage production migrate`
 
+#### Make superuser
+To create a superuser on zappa based Django instance you must use the raw parameter and execute a command (non-valid example below)
+```
+zappa invoke --raw production "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('admin', 'admin@yourdomain.com', 'horse battery stapler')"
+```
+#### Debug on the commandline
 To _debug_ issues on the deployed instance use `zappa tail`
 ```
 zappa tail production
