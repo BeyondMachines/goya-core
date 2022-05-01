@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.decorators.http import require_http_methods # To restrict access to views based on the request method 
 from django.conf import settings
 from slack_sdk.oauth import AuthorizeUrlGenerator
@@ -47,7 +47,8 @@ def slack_install_view(request, *args, **kwargs):
     context = {
         'generated_url': generated_url,
     }
-    return render(request, "slack_app/slack_install.html", context)
+    # return render(request, "slack_app/slack_install.html", context)
+    return redirect(generated_url)
 
 @require_http_methods(["GET"])
 def slack_callback_view(request, *args, **kwargs):

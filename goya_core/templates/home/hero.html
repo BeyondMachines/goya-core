@@ -3,15 +3,24 @@
         <div class="container my-5">
             <div class="row p-4 pb-0 pe-lg-0 pt-lg-5 align-items-center rounded-3 border shadow-lg">
               <div class="col-lg-7 p-3 p-lg-5 pt-lg-3">
-                <h1 class="display-4 fw-bold lh-1">Border hero with cropped image and shadows</h1>
-                <p class="lead">Quickly design and customize responsive mobile-first sites with Bootstrap, the world’s most popular front-end open source toolkit, featuring Sass variables and mixins, responsive grid system, extensive prebuilt components, and powerful JavaScript plugins.</p>
+                <h1 class="display-4 fw-bold lh-1">Cybersecurity knowledge at a human pace</h1>
+                <p class="lead">Build your team cybersecurity awareness and practices - right in Slack.</p>
+                <p class="lead">Deliver cybersecurity knowledge with curated, brief and frequent content that is relevant and applicable to your team.</p>
+                <p class="lead">Avoid the pitfalls of "no time", "too technical", "just a tickbox" and "can't happen to me".</p>
                 <div class="d-grid gap-2 d-md-flex justify-content-md-start mb-4 mb-lg-3">
-                  <button type="button" class="btn btn-primary btn-lg px-4 me-md-2 fw-bold">Primary</button>
-                  <button type="button" class="btn btn-outline-secondary btn-lg px-4">Default</button>
+                  <a class="btn btn-custom-primary btn-lg px-4 me-md-2" href="{% url 'slack_install' %}"><i class="bi bi-slack"></i>
+                    Add to Slack</a>
+                  <a class="btn btn-outline-secondary btn-lg px-4" href="#features"><span class="bi-alarm"></span>
+                    Learn more</a>
+                </div>
+                <div class="d-grid gap-3 d-md-flex justify-content-md-start mb-4 mb-lg-3 fw-lighter">
+                  <span class="bi bi-cloud">  Hosted in Germany</span>
+                  <span class="bi bi-magic">  Works immediately</span>
+                  <span class="bi bi-coin">  No credit card required</span>
                 </div>
               </div>
-              <div class="col-lg-4 offset-lg-1 p-0 overflow-hidden shadow-lg">
-                  <img class="rounded-lg-3" src="{% static 'img/content/bootstrap-docs.png' %}" alt="" width="720">
+              <div class="col-lg-4 p-0">
+                  <img class="img-fluid" src="{% static 'img/content/hero_image.png' %}" alt="">
               </div>
             </div>
          </div>
