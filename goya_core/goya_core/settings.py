@@ -103,6 +103,7 @@ INSTALLED_APPS = [
     # third party tools
     'bootstrap5',
     'storages',  # needed for the django s3 static files
+    'ckeditor',
 
 ]
 
@@ -241,6 +242,19 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# CKEDITOR RICH TEXT EDITOR SETTING
+CKEDITOR_CONFIGS = {
+    'default': {
+        'toolbar': [["Format", "Bold", "Italic", "Underline", "Strike", "SpellChecker"],
+                    ['NumberedList', 'BulletedList', "Indent", "Outdent", 'JustifyLeft', 'JustifyCenter',
+                    'JustifyRight', 'JustifyBlock'],
+                    #  ["Image"],
+                    ["Table", "Link", "Unlink", "Anchor", "SectionLink", "Subscript", "Superscript"], ['Undo', 'Redo'],
+                    #  ["Source"],
+                    ],
+        'width': 'auto',
+    },
+}
 
 SITE_ID = 1
 

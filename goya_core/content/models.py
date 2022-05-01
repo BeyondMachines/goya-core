@@ -3,6 +3,7 @@ from datetime import date, datetime
 from slugify import slugify
 import random
 import re
+from ckeditor.fields import RichTextField
 
 # import models
 from django.db import models
@@ -14,7 +15,7 @@ class Advisory(models.Model):  # this is a generic challenge model where all cha
     The Advisory model contains the individual advisories that are created for sending as immediate messages.
     '''
     advisory_title = models.CharField(max_length=200, blank=False, null=False)
-    advisory_details = models.TextField(blank=False, null=False)
+    advisory_details = RichTextField(blank=False, null=False)
     advisory_url = models.SlugField(max_length=100, blank=True, null=True)  # the slug text for the url
     advisory_published_date = models.DateField(blank=True, null=False, default=date.today)
 
