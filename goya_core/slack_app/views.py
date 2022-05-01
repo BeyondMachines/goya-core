@@ -181,11 +181,14 @@ def slack_callback_view(request, *args, **kwargs):
                 installation_st.save(installation)
                 # client.chat_postMessage(channel='#general', text='hello with Oauth access token authentication. second step towards token authentication. Now works only on install App action.')
 
-                return HttpResponse("Thanks for installing this app!")
+                context = {
+                }
+                return render(request, "slack_app/install_success.html", context)
             else:
-                return HttpResponseBadRequest("Application is already installed") 
+                context = {
+                }
+                return render(request, "slack_app/install_exists.html", context)
         else:
-            
             return HttpResponseBadRequest("Error: The state value is expired. Start the installation again and complete it within 5 minutes of starting.")
     else:
         error = args["error"] if "error" in args else "no error message available"
@@ -225,3 +228,9 @@ def test_message_view(request, *args, **kwargs):
 
         print(result)
     return HttpResponse("Test completed! Result: "+result.http_verb)
+
+
+def design_page_view(request, *args, **kwargs):
+    context = {
+    }
+    return render(request, "slack_app/install_exists.html", context)
