@@ -374,3 +374,9 @@ zappa undeploy production
 - Zappa deploy has a problem if the default region is different than the configured region. I made a temp fix by changing the ~./aws/config for the default user to be the same region as the zappa user. 
 - We need to deploy continuous integration
 https://medium.com/@vladimirnani/continuous-delivery-with-zappa-61518bd9b1a7
+
+### Design elements
+
+#### Good logo sources
+https://delesign.com/free-designs/graphics/
+https://undraw.co/illustrations
