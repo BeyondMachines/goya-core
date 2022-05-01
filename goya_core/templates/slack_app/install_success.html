@@ -1,0 +1,17 @@
+{% extends 'general/base.html' %}
+{% load static %}
+
+
+{% block main %}
+<div id="features" class="row bm-offset">
+    <div class="col-12">
+        {% block features %}
+            {% include 'slack_app/slack_add_to_channel.html' %}
+        {% endblock %}
+    </div>
+</div>
+
+
+
+{% endblock %}
+

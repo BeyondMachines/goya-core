@@ -12,3 +12,15 @@ def home_view(request, *args, **kwargs):
     context = {
     }
     return render(request, "home/home.html", context)
+
+def err_handler404(request, exception):
+    return render(request, "errors/404.html", status=404)
+
+def err_handler500(request, exception=None):
+    return render(request, "errors/500.html", status=500)
+
+def err_handler403(request, exception=None):
+    return render(request, "errors/403.html", status=403)
+
+def err_handler400(request, exception=None):
+    return render(request, "errors/400.html", status=400)
