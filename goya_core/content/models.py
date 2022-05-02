@@ -17,7 +17,7 @@ class Advisory(models.Model):  # this is a generic challenge model where all cha
     advisory_title = models.CharField(max_length=200, blank=False, null=False)
     advisory_details = RichTextField(blank=False, null=False)
     advisory_url = models.SlugField(max_length=100, blank=True, null=True)  # the slug text for the url
-    advisory_published_date = models.DateField(blank=True, null=False, default=date.today)
+    advisory_published_time = models.DateTimeField(blank=True, null=False, default=datetime.now)
 
     def __str__(self):
         return self.advisory_title

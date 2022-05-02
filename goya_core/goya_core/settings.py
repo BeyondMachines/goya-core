@@ -99,6 +99,7 @@ INSTALLED_APPS = [
     'main',
     'content',
     'slack_app',
+    'communicator',
 
     # third party tools
     'bootstrap5',

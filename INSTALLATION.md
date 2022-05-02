@@ -22,12 +22,24 @@
 		* [Create needed S3 buckets](#CreateneededS3buckets)
 		* [Create RDS DB](#CreateRDSDB)
 		* [S3 Static files setup](#S3Staticfilessetup)
+		* [Create a Certificate for the public websites.](#CreateaCertificateforthepublicwebsites.)
 		* [Create a CloudFront distribution for static files](#CreateaCloudFrontdistributionforstaticfiles)
 		* [Insert parameters in AWS Systems Manager Parameter Store.](#InsertparametersinAWSSystemsManagerParameterStore.)
+		* [Create alias for API Gateway](#CreatealiasforAPIGateway)
+		* [Certify the custom domain name](#Certifythecustomdomainname)
 	* [Configure the zappa_settings.json](#Configurethezappa_settings.json)
 		* [Set up VPC](#SetupVPC)
 		* [Set up Role](#SetupRole)
 	* [Deploy, update and manage the application](#Deployupdateandmanagetheapplication)
+		* [Deploy and undeploy](#Deployandundeploy)
+		* [Execute migrations](#Executemigrations)
+		* [Make superuser](#Makesuperuser)
+		* [Debug on the commandline](#Debugonthecommandline)
+	* [Analytics](#Analytics)
+	* [Design elements](#Designelements)
+	* [Django preferences](#Djangopreferences)
+		* [Admin theme colors.](#Adminthemecolors.)
+		* [Good logo sources](#Goodlogosources)
 
 <!-- vscode-markdown-toc-config
 	numbering=false
@@ -255,7 +267,7 @@ Add CORS policy to allow for public access to the bucket for static fu
     }
 ]
 ```
-#### Create a Certificate for the public websites.
+#### <a name='CreateaCertificateforthepublicwebsites.'></a>Create a Certificate for the public websites.
 Select us-east-1 (N.Virginia) region and  Go to Amazon Certificate Manager (ACN)
 Create a wildcard certificate for your domain (this will be used for the CDN public alias and for the application url alias)
 
@@ -306,11 +318,11 @@ Then grant the Zappa role proper permissions to access that information by updat
             ]
         },
 ```
-#### Create alias for API Gateway
+#### <a name='CreatealiasforAPIGateway'></a>Create alias for API Gateway
 Go to the API Gateway and create a custom domain name. Select Edge as the type of configuration, and select the certificate you created in the ACM above.
 Manally create the CNAME record in Route53 for the custom domain name to point to the API gateway name displayed in the API Gateay configuration.
 
-#### Certify the custom domain name
+#### <a name='Certifythecustomdomainname'></a>Certify the custom domain name
 Add the following configuration to the `zappa_settings.json`:
 
 Also, add the custom domain to the ALLOWED_HOSTS in the `goya_core/goya_core/settings.py`
@@ -337,7 +349,7 @@ Configure the `zappa_settings.json` file with Zappa role to be assigned to the A
 ```
 
 ### <a name='Deployupdateandmanagetheapplication'></a>Deploy, update and manage the application
-#### Deploy and undeploy
+#### <a name='Deployandundeploy'></a>Deploy and undeploy
 To _deploy_ the application (assuming the name is `production`) from the `goya-core/goya_core` folder (where the `manage.py` program sits), run:
 ```
 zappa deploy production
@@ -348,18 +360,18 @@ To _update_ the code of the application with new code, (assuming the name is `pr
 zappa update production
 ```
 
-#### Execute migrations
+#### <a name='Executemigrations'></a>Execute migrations
 To execute _migrations_, it's a three step process:
 - prepare migrations locally: `python manage.py makemigrations`
 - update instance: `zappa update production`
 - execute migrations: `zappa manage production migrate`
 
-#### Make superuser
+#### <a name='Makesuperuser'></a>Make superuser
 To create a superuser on zappa based Django instance you must use the raw parameter and execute a command (non-valid example below)
 ```
 zappa invoke --raw production "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('admin', 'admin@yourdomain.com', 'horse battery stapler')"
 ```
-#### Debug on the commandline
+#### <a name='Debugonthecommandline'></a>Debug on the commandline
 To _debug_ issues on the deployed instance use `zappa tail`
 ```
 zappa tail production
@@ -375,8 +387,88 @@ zappa undeploy production
 - We need to deploy continuous integration
 https://medium.com/@vladimirnani/continuous-delivery-with-zappa-61518bd9b1a7
 
-### Design elements
 
-#### Good logo sources
+### <a name='Analytics'></a>Analytics
+
+The platform is using analytics from MicroAnalytics - a privacy focused platform. 
+It's implemented as a JS script in the head of the base.html
+### <a name='Designelements'></a>Design elements
+
+### <a name='Djangopreferences'></a>Django preferences
+
+#### <a name='Adminthemecolors.'></a>Admin theme colors. 
+Django started conforming to the browser preferences for light/dark mode, but it doesn't have a manual setting to force one version.
+This is a problem since some plugins that exist in the admin panel don't apply the dark mode properly.
+A workaround to get the light theme back:
+1. Create admin folder inside your templates folder, then create file base.html
+```
+templates/admin/base.html
+```
+2. copy this code into base.html
+
+```
+{% extends 'admin/base.html' %}
+
+{% block extrahead %}{{ block.super }}
+<style>
+/* VARIABLE DEFINITIONS */
+:root {
+  --primary: #79aec8;
+  --secondary: #417690;
+  --accent: #f5dd5d;
+  --primary-fg: #fff;
+
+  --body-fg: #333;
+  --body-bg: #fff;
+  --body-quiet-color: #666;
+  --body-loud-color: #000;
+
+  --header-color: #ffc;
+  --header-branding-color: var(--accent);
+  --header-bg: var(--secondary);
+  --header-link-color: var(--primary-fg);
+
+  --breadcrumbs-fg: #c4dce8;
+  --breadcrumbs-link-fg: var(--body-bg);
+  --breadcrumbs-bg: var(--primary);
+
+  --link-fg: #447e9b;
+  --link-hover-color: #036;
+  --link-selected-fg: #5b80b2;
+
+  --hairline-color: #e8e8e8;
+  --border-color: #ccc;
+
+  --error-fg: #ba2121;
+
+  --message-success-bg: #dfd;
+  --message-warning-bg: #ffc;
+  --message-error-bg: #ffefef;
+
+  --darkened-bg: #f8f8f8; /* A bit darker than --body-bg */
+  --selected-bg: #e4e4e4; /* E.g. selected table cells */
+  --selected-row: #ffc;
+
+  --button-fg: #fff;
+  --button-bg: var(--primary);
+  --button-hover-bg: #609ab6;
+  --default-button-bg: var(--secondary);
+  --default-button-hover-bg: #205067;
+  --close-button-bg: #888; /* Previously #bbb, contrast 1.92 */
+  --close-button-hover-bg: #747474;
+  --delete-button-bg: #ba2121;
+  --delete-button-hover-bg: #a41515;
+
+  --object-tools-fg: var(--button-fg);
+  --object-tools-bg: var(--close-button-bg);
+  --object-tools-hover-bg: var(--close-button-hover-bg);
+}
+
+
+</style>
+{% endblock %}
+```
+
+#### <a name='Goodlogosources'></a>Good logo sources
 https://delesign.com/free-designs/graphics/
 https://undraw.co/illustrations
