@@ -12,9 +12,10 @@ import os
 from slack_sdk.web import WebClient
 from django.http import HttpResponseBadRequest, HttpResponse
 from django.contrib.auth.decorators import login_required
+from datetime import datetime
 
 
-
+from communicator.views import update_workspace_advisory
 from main.models import SlackInstalledWorkspace
 from content.models import Advisory
 
@@ -179,8 +180,21 @@ def slack_callback_view(request, *args, **kwargs):
 
                 # Store the installation
                 installation_st.save(installation)
+                update_workspace_advisory(new_workspace,datetime.now())
                 # client.chat_postMessage(channel='#general', text='hello with Oauth access token authentication. second step towards token authentication. Now works only on install App action.')
+                
 
+                # now we send notification to Slack to the admin that installed the application
+                client = WebClient(token=installation.bot_token)
+                status_result = client.chat_postMessage(channel=installation.user_id, text="<@"+installation.user_id+">"+":wave: BeyondMachines Slack bot successfully installed")  # this line sends the status message to the admin user to remind him if everything is OK.
+
+
+                # now we send a notification to the overall Slack admin to the beyondmachines app.
+                installation = installation_st.find_installation(enterprise_id="No_Ent_ID",team_id="TNMQGFG4F")
+                print(installation)
+                client = WebClient(token=installation.bot_token)
+                status_result = client.chat_postMessage(channel=installation.user_id, text="<@"+installation.user_id+">"+":wave: We have a new registered workspace "+installed_workspace_name)  # this line sends the status message to the admin user to remind him if everything is OK.
+        
                 context = {
                 }
                 return render(request, "slack_app/install_success.html", context)
@@ -194,43 +208,10 @@ def slack_callback_view(request, *args, **kwargs):
         error = args["error"] if "error" in args else "no error message available"
         return HttpResponseBadRequest("Something is wrong with the installation (Error message: "+error+")")
 
-@login_required  # the message is protected. 
-@require_http_methods(["GET"])
-def test_message_view(request, *args, **kwargs):
-
-    client_id=str(settings.SLACK_CLIENT_ID)
-    client_secret=str(settings.SLACK_CLIENT_SECRET)
-    if str(settings.LOCAL_TEST) == 'True':  # preparing a place where the state store - Local is sqlite. Parameters are in settings, server is S3
-        installation_store = SQLite3InstallationStore(
-            database=settings.STATE_DB_NAME,
-            client_id=client_id
-        ) 
-    else:
-        s3_client = boto3.client("s3")
-        installation_store=AmazonS3InstallationStore(
-            s3_client=s3_client,
-            bucket_name="goya-slack-installation-store",
-            client_id=client_id
-        )
-    all_workspaces = SlackInstalledWorkspace.objects.all()
-    all_advisories = Advisory.objects.all()
-
-    for workspace in all_workspaces:
-        print(workspace)
-        installation = installation_store.find_installation(enterprise_id=workspace.enterprise_id,team_id=workspace.workspace_id)
-        client = WebClient(token=installation.bot_token)
-        spacer_line = "===================================="
-        message_text=""
-        for advisory in all_advisories:
-            message_text = "*"+advisory.advisory_title+"*" + "\n" + spacer_line + "\n" + advisory.advisory_details + "\n\n"
-        result = client.chat_postMessage(channel='#general', text=message_text)
-        status_result = client.chat_postMessage(channel=installation.user_id, text="<@"+installation.user_id+">"+":wave: i sent a message")  # this line sends the status message to the admin user to remind him if everything is OK. The important part is 
-
-        print(result)
-    return HttpResponse("Test completed! Result: "+result.http_verb)
-
 
 def design_page_view(request, *args, **kwargs):
     context = {
     }
     return render(request, "slack_app/install_exists.html", context)
+
+

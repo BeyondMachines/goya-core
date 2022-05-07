@@ -16,7 +16,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from main.views import home_view, err_handler400, err_handler403, err_handler404, err_handler500
-from slack_app.views import slack_install_view, slack_callback_view, test_message_view
+from slack_app.views import slack_install_view, slack_callback_view
+from communicator.views import send_advisories_view
 from django.contrib.flatpages import views
 
 handler400 = err_handler400
@@ -31,7 +32,7 @@ urlpatterns = [
     path('', home_view, name='home'),
     path('slack/install', slack_install_view, name='slack_install'),
     path('slack/oauth/callback', slack_callback_view, name='slack_callback'),
-    path('slack/test', test_message_view, name='test_message'),
+    path('send/', send_advisories_view, name='send_advisories'),
     #  path('slack/design', design_page_view, name='design'),
     # below are the flatpages content objects
     path('privacy/', views.flatpage, {'url': '/privacy/'}, name='privacy'),

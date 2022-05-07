@@ -5,7 +5,7 @@ from content.models import Advisory
 
 class AdvisoryModelAdmin(admin.ModelAdmin):
     readonly_fields = ('advisory_url',)
-    list_display = ('advisory_title', 'advisory_published_date')
+    list_display = ('advisory_title', 'advisory_published_time')
 
 
 admin.site.register(Advisory, AdvisoryModelAdmin)

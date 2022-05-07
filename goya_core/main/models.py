@@ -19,6 +19,7 @@ class SlackInstalledWorkspace(models.Model):  # this is a generic challenge mode
     admin_user_name = models.CharField(max_length=200, blank=False, null=False)
     admin_user_email = models.EmailField(blank=True, null=False)
     workspace_url = models.SlugField(max_length=200, blank=True, null=True)  # the slug text for the url
+    workspace_joined_time = models.DateTimeField(blank=True, null=False, default=datetime.now)
 
     class Meta:
         unique_together = ('enterprise_id', 'workspace_id')  # block duplicating of workspace records

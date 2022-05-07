@@ -6,7 +6,7 @@ from main.models import SlackInstalledWorkspace
 
 class SlackInstalledWorkspaceAdmin(admin.ModelAdmin):
     readonly_fields = ('workspace_url',)
-    list_display = ('workspace_name', 'admin_user_name', 'admin_user_email')
+    list_display = ('workspace_name', 'admin_user_name', 'admin_user_email','workspace_joined_time')
 
 
 admin.site.register(SlackInstalledWorkspace, SlackInstalledWorkspaceAdmin)
