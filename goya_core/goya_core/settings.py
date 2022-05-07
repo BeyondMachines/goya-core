@@ -48,6 +48,7 @@ if os.environ.get('AWS_REGION'):  # Check whether AWS_REGION variable exists to 
     SLACK_CLIENT_SECRET = get_ssm_key('GOYA_SLACK_CLIENT_SECRET')
     SLACK_CLIENT_ID = get_ssm_key('GOYA_SLACK_CLIENT_ID')
     SLACK_REDIRECT_URI = get_ssm_key('GOYA_SLACK_INSTALL_REDIRECT_URL')
+    MIXPANEL_TOKEN= get_ssm_key('GOYA_MIXPANEL_TOKEN')
 else:
     LOCAL_TEST = True
     DEBUG = os.getenv('DJANGO_DEBUG', True)
@@ -57,6 +58,7 @@ else:
     SLACK_CLIENT_ID = os.environ["SLACK_CLIENT_ID"]  # the ID issued to our app
     SLACK_REDIRECT_URI= os.environ["SLACK_REDIRECT_URL"]  # the redirect URL set up in our app that the user will be redirected after the initial setup.
     STATE_DB_NAME = LOCAL_DATA_STORE / 'state_store.sqlite3'  # the database which keeps the Oauth request states for a local installation
+    MIXPANEL_TOKEN= os.environ["MIXPANEL_TOKEN"]
     ALLOWED_HOSTS = ['*']  # when running on localhost to allow extenal proxy connections
     USE_S3 = False  # tell the static file setup not to look for the S3 version of static files
 
@@ -105,7 +107,6 @@ INSTALLED_APPS = [
     'bootstrap5',
     'storages',  # needed for the django s3 static files
     'ckeditor',
-    'analytical',
 
 ]
 
@@ -263,5 +264,3 @@ SITE_ID = 1
 LOGIN_REDIRECT_URL = 'home'
 ACCOUNT_LOGOUT_REDIRECT_URL = 'home'
 ACCOUNT_PRESERVE_USERNAME_CASING = False
-
-MIXPANEL_API_TOKEN = '0628d8527f8603a81f786372d18853d0'

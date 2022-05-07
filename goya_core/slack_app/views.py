@@ -15,7 +15,7 @@ from django.contrib.auth.decorators import login_required
 from datetime import datetime
 
 
-from communicator.views import update_workspace_advisory, update_workspace_event_report
+from communicator.views import update_workspace_advisory, update_workspace_event_report, send_analytics
 from main.models import SlackInstalledWorkspace
 from content.models import Advisory
 
@@ -45,6 +45,7 @@ def slack_install_view(request, *args, **kwargs):
         state_st = state_store
     state = state_st.issue()  # we issue a temporary state variable to be used in the request so the link can't be recycled 
     generated_url = authorize_url_generator.generate(state)
+    send_analytics(request, "Install Slack App")
     context = {
         'generated_url': generated_url,
     }
@@ -195,17 +196,20 @@ def slack_callback_view(request, *args, **kwargs):
                 print(installation)
                 client = WebClient(token=installation.bot_token)
                 status_result = client.chat_postMessage(channel=installation.user_id, text="<@"+installation.user_id+">"+":wave: We have a new registered workspace "+installed_workspace_name)  # this line sends the status message to the admin user to remind him if everything is OK.
-        
+                send_analytics(request, "Install Slack App - Success")
                 context = {
                 }
                 return render(request, "slack_app/install_success.html", context)
             else:
+                send_analytics(request, "Install Slack App - Error Exists")
                 context = {
                 }
                 return render(request, "slack_app/install_exists.html", context)
         else:
+            send_analytics(request, "Install Slack App - Error Expired")
             return HttpResponseBadRequest("Error: The state value is expired. Start the installation again and complete it within 5 minutes of starting.")
     else:
+        send_analytics(request, "Install Slack App - Error Message")
         error = args["error"] if "error" in args else "no error message available"
         return HttpResponseBadRequest("Something is wrong with the installation (Error message: "+error+")")
 
