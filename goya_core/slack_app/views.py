@@ -15,7 +15,7 @@ from django.contrib.auth.decorators import login_required
 from datetime import datetime
 
 
-from communicator.views import update_workspace_advisory
+from communicator.views import update_workspace_advisory, update_workspace_event_report
 from main.models import SlackInstalledWorkspace
 from content.models import Advisory
 
@@ -181,6 +181,7 @@ def slack_callback_view(request, *args, **kwargs):
                 # Store the installation
                 installation_st.save(installation)
                 update_workspace_advisory(new_workspace,datetime.now())
+                update_workspace_event_report(new_workspace,datetime.now())
                 # client.chat_postMessage(channel='#general', text='hello with Oauth access token authentication. second step towards token authentication. Now works only on install App action.')
                 
 

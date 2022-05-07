@@ -7,3 +7,4 @@ TBD
 
 ## Models defined in this app
 - `Advisory` - model is created, and can be populated from the Admin interface. The Advisory model contains the short advisory news sent via the bots. 
+- `RealLifeEvent` - The RealLifeEvents model contains the individual events that happen during and are used for awareness examples. 

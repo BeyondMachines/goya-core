@@ -30,3 +30,25 @@ class Advisory(models.Model):  # this is a generic challenge model where all cha
         if not self.advisory_url:
             self.advisory_url = slugify(self.advisory_title + '-' + str(random.choices(string.ascii_uppercase + string.digits, k=4)))
         super(Advisory, self).save(*args, **kwargs)
+
+
+class RealLifeEvent(models.Model):  # this is a generic challenge model where all challenges are picked up from.
+    '''
+    The RealLifeEvents model contains the individual events that happen during and are used for awareness examples. 
+    '''
+    event_title = models.CharField(max_length=200, blank=False, null=False)
+    event_details = RichTextField(blank=False, null=False)
+    event_url = models.SlugField(max_length=100, blank=True, null=True)  # the slug text for the url
+    event_published_time = models.DateTimeField(blank=True, null=False, default=datetime.now)
+
+    def __str__(self):
+        return self.event_title
+
+    def title_no_spaces(self):
+        return re.sub('[^a-zA-Z0-9]', '_', self.event_title)  # use regex to replace anything non alphanumeric with underscore
+        #  return self.challenge_title.replace(" ", "_")
+
+    def save(self, *args, **kwargs):  # the autogeneration of the slug for the challenge
+        if not self.event_url:
+            self.event_url = slugify(self.event_title + '-' + str(random.choices(string.ascii_uppercase + string.digits, k=4)))
+        super(RealLifeEvent, self).save(*args, **kwargs)

@@ -13,15 +13,18 @@ from slack_sdk.errors import SlackApiError
 from datetime import datetime    
 
 
-from content.models import Advisory
+from content.models import Advisory, RealLifeEvent
 from main.models import SlackInstalledWorkspace
-from communicator.models import Latest_Advisory
+from communicator.models import Latest_Advisory, Latest_Event_Report
 
 # Create your views here.
 
 @login_required  # the message is protected. 
 @require_http_methods(["GET"])
 def send_advisories_view(request, *args, **kwargs):
+    '''
+    a view to send the individual advisory e-mail to take action because of a vulnerability or zero day attack.
+    '''
 
     client_id=str(settings.SLACK_CLIENT_ID)
     client_secret=str(settings.SLACK_CLIENT_SECRET)
@@ -60,17 +63,75 @@ def send_advisories_view(request, *args, **kwargs):
                     message = message+" On workspace "+workspace.workspace_name
                     installation1 = installation_store.find_installation(enterprise_id="No_Ent_ID",team_id="TNMQGFG4F")
                     notify_admin(installation1.user_id, installation1.bot_token, message)
+    return HttpResponse("Advisories Sent! Result: ")
 
-    
-    return HttpResponse("Test completed! Result: ")
-    
+
+@login_required  # the message is protected. 
+@require_http_methods(["GET"])
+def send_event_report_view(request, *args, **kwargs):
+    '''
+    a view to send summary of real life events to all workspaces. Should be scheduled to run once per week. 
+    '''
+    client_id=str(settings.SLACK_CLIENT_ID)
+    client_secret=str(settings.SLACK_CLIENT_SECRET)
+    if str(settings.LOCAL_TEST) == 'True':  # preparing a place where the state store - Local is sqlite. Parameters are in settings, server is S3
+        installation_store = SQLite3InstallationStore(
+            database=settings.STATE_DB_NAME,
+            client_id=client_id
+        ) 
+    else:
+        s3_client = boto3.client("s3")
+        installation_store=AmazonS3InstallationStore(
+            s3_client=s3_client,
+            bucket_name="goya-slack-installation-store",
+            client_id=client_id
+        )
+    all_workspaces = SlackInstalledWorkspace.objects.all()
+    # 
+    for workspace in all_workspaces:
+        latest_event_report_time = Latest_Event_Report.objects.get(advised_workspace=workspace).latest_event_report_time
+        event_reports = RealLifeEvent.objects.filter(event_published_time__gt=latest_event_report_time)
+        if event_reports:
+            installation = installation_store.find_installation(enterprise_id=workspace.enterprise_id,team_id=workspace.workspace_id)
+            client = WebClient(token=installation.bot_token)
+            intro_line = "*Latest Cybersecurity Events and lessons learned* \n ==================================== \n\n"
+            spacer_line = "\n------------------------------------\n"
+            delimiter_line = "\n++++++++++++++++++++++++++++++++++++\n"
+            message_text= intro_line
+            for event_report in event_reports:
+                message_text = message_text + "*"+event_report.event_title+"*" + spacer_line + markdown(event_report.event_details) + delimiter_line
+            try:
+                client.chat_postMessage(channel='#general', text=message_text)
+                update_workspace_event_report(workspace,datetime.now())
+            except SlackApiError as error:
+                message = "ERROR - We couldn't send an event report. The error was:"+error.response['error']
+                # notify admin
+                notify_admin(installation.user_id, installation.bot_token, message)
+                # notify superadmin
+                message = message+" On workspace "+workspace.workspace_name
+                installation1 = installation_store.find_installation(enterprise_id="No_Ent_ID",team_id="TNMQGFG4F")
+                notify_admin(installation1.user_id, installation1.bot_token, message)
+    return HttpResponse("Events Sent! Result: ")
+
 
 def update_workspace_advisory(workspace,time):
+    '''
+    internal function for updating the latest time an advisory is sent to a workspace so we don't repeat advisories
+    '''
     obj, created = Latest_Advisory.objects.update_or_create(advised_workspace=workspace, defaults={'latest_advisory_time' : time})
     return(obj)
-    return(True)
+
+def update_workspace_event_report(workspace,time):
+    '''
+    internal function for updating the latest time a summary of events is sent to a workspace so we don't repeat events
+    '''
+    obj, created = Latest_Advisory.objects.update_or_create(advised_workspace=workspace, defaults={'latest_event_report_time' : time})
+    return(obj)
 
 
 def notify_admin(receiving_channel, receiving_token, receiving_message):
+    '''
+    internal function that sends a slack notification to the admin of the workspace based on different events (new workspace, error in sending notifications etc.)
+    '''
     client = WebClient(token=receiving_token)
     status_result = client.chat_postMessage(channel=receiving_channel, text=receiving_message) 

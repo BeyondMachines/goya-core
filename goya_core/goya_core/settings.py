@@ -40,7 +40,7 @@ LOCAL_DATA_STORE = Path(__file__).resolve().parent.parent.parent / 'local_data_s
 if os.environ.get('AWS_REGION'):  # Check whether AWS_REGION variable exists to see if running in AWS or locally
     LOCAL_TEST = False
     DEBUG = os.environ.get('DJANGO_DEBUG', False)
-    hosts = ['app.beyondmachines.net']  # the following code populates the ALLOWED_HOSTS starting from an empty list.
+    hosts = ['app.beyondmachines.net','beyondmachines.net','www.beyondmachines.net']  # the following code populates the ALLOWED_HOSTS starting from an empty list.
     api_gatway = get_ssm_key('GOYA_API_GATEWAY')
     hosts.append(api_gatway)
     ALLOWED_HOSTS = hosts
@@ -105,6 +105,7 @@ INSTALLED_APPS = [
     'bootstrap5',
     'storages',  # needed for the django s3 static files
     'ckeditor',
+    'analytical',
 
 ]
 
@@ -251,7 +252,7 @@ CKEDITOR_CONFIGS = {
                     'JustifyRight', 'JustifyBlock'],
                     #  ["Image"],
                     ["Table", "Link", "Unlink", "Anchor", "SectionLink", "Subscript", "Superscript"], ['Undo', 'Redo'],
-                    #  ["Source"],
+                    ["Source"],
                     ],
         'width': 'auto',
     },
@@ -263,3 +264,4 @@ LOGIN_REDIRECT_URL = 'home'
 ACCOUNT_LOGOUT_REDIRECT_URL = 'home'
 ACCOUNT_PRESERVE_USERNAME_CASING = False
 
+MIXPANEL_API_TOKEN = '0628d8527f8603a81f786372d18853d0'
