@@ -16,7 +16,7 @@ import mixpanel
 
 from content.models import Advisory, RealLifeEvent
 from main.models import SlackInstalledWorkspace
-from communicator.models import Latest_Advisory, Latest_Event_Report
+from communicator.models import Latest_Advisory, Latest_Event_Report, Advisories_Sent, Events_Sent
 
 # Create your views here.
 
@@ -26,7 +26,6 @@ def send_advisories_view(request, *args, **kwargs):
     '''
     a view to send the individual advisory e-mail to take action because of a vulnerability or zero day attack.
     '''
-
     client_id=str(settings.SLACK_CLIENT_ID)
     client_secret=str(settings.SLACK_CLIENT_SECRET)
     if str(settings.LOCAL_TEST) == 'True':  # preparing a place where the state store - Local is sqlite. Parameters are in settings, server is S3
@@ -56,6 +55,7 @@ def send_advisories_view(request, *args, **kwargs):
                 try:
                     client.chat_postMessage(channel='#general', text=message_text)
                     update_workspace_advisory(workspace,datetime.now())
+                    update_workspace_advisory_list(workspace,advisory,datetime.now())
                 except SlackApiError as error:
                     message = "ERROR - We couldn't send an advisory. The error was:"+error.response['error']
                     # notify admin
@@ -92,7 +92,9 @@ def send_event_report_view(request, *args, **kwargs):
     for workspace in all_workspaces:
         latest_event_report_time = Latest_Event_Report.objects.get(advised_workspace=workspace).latest_event_report_time
         event_reports = RealLifeEvent.objects.filter(event_published_time__gt=latest_event_report_time)
+        print('Prepared for sending Events')
         if event_reports:
+            print('Got into sending Events')
             installation = installation_store.find_installation(enterprise_id=workspace.enterprise_id,team_id=workspace.workspace_id)
             client = WebClient(token=installation.bot_token)
             intro_line = "*Latest Cybersecurity Events and lessons learned* \n ==================================== \n\n"
@@ -104,6 +106,8 @@ def send_event_report_view(request, *args, **kwargs):
             try:
                 client.chat_postMessage(channel='#general', text=message_text)
                 update_workspace_event_report(workspace,datetime.now())
+                for event_report in event_reports:
+                    update_workspace_event_list(workspace, event_report, datetime.now())
             except SlackApiError as error:
                 message = "ERROR - We couldn't send an event report. The error was:"+error.response['error']
                 # notify admin
@@ -122,11 +126,28 @@ def update_workspace_advisory(workspace,time):
     obj, created = Latest_Advisory.objects.update_or_create(advised_workspace=workspace, defaults={'latest_advisory_time' : time})
     return(obj)
 
+
+def update_workspace_advisory_list(workspace,advisory,time):
+    '''
+    internal function for registering sent advisories to workspace for analytics
+    '''
+    obj = Advisories_Sent.objects.create(advised_workspace=workspace, advisory_sent=advisory, advisory_sent_time=time)
+    return(obj)
+
+
 def update_workspace_event_report(workspace,time):
     '''
     internal function for updating the latest time a summary of events is sent to a workspace so we don't repeat events
     '''
     obj, created = Latest_Event_Report.objects.update_or_create(advised_workspace=workspace, defaults={'latest_event_report_time' : time})
+    return(obj)
+
+
+def update_workspace_event_list(workspace,event,time):
+    '''
+    internal function for registering sent events to workspace for analytics
+    '''
+    obj = Events_Sent.objects.create(advised_workspace=workspace, event_sent=event, event_sent_time=time)
     return(obj)
 
 
