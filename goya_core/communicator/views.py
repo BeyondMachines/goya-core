@@ -11,6 +11,7 @@ from django.contrib.auth.decorators import login_required
 from markdownify import markdownify as markdown  # to convert html to markdown
 from slack_sdk.errors import SlackApiError
 from datetime import datetime    
+import mixpanel
 
 
 from content.models import Advisory, RealLifeEvent
@@ -125,7 +126,7 @@ def update_workspace_event_report(workspace,time):
     '''
     internal function for updating the latest time a summary of events is sent to a workspace so we don't repeat events
     '''
-    obj, created = Latest_Advisory.objects.update_or_create(advised_workspace=workspace, defaults={'latest_event_report_time' : time})
+    obj, created = Latest_Event_Report.objects.update_or_create(advised_workspace=workspace, defaults={'latest_event_report_time' : time})
     return(obj)
 
 
@@ -135,3 +136,17 @@ def notify_admin(receiving_channel, receiving_token, receiving_message):
     '''
     client = WebClient(token=receiving_token)
     status_result = client.chat_postMessage(channel=receiving_channel, text=receiving_message) 
+
+
+
+def send_analytics(request, event):
+    mp_eu = mixpanel.Mixpanel(
+        settings.MIXPANEL_TOKEN,
+        consumer=mixpanel.Consumer(api_host="api-eu.mixpanel.com"),
+        )
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    mp_eu.track(ip, event)
