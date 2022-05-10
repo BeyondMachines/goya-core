@@ -183,17 +183,22 @@ def slack_callback_view(request, *args, **kwargs):
                 installation_st.save(installation)
                 update_workspace_advisory(new_workspace,datetime.now())
                 update_workspace_event_report(new_workspace,datetime.now())
-                # client.chat_postMessage(channel='#general', text='hello with Oauth access token authentication. second step towards token authentication. Now works only on install App action.')
                 
 
                 # now we send notification to Slack to the admin that installed the application
                 client = WebClient(token=installation.bot_token)
-                status_result = client.chat_postMessage(channel=installation.user_id, text="<@"+installation.user_id+">"+":wave: BeyondMachines Slack bot successfully installed")  # this line sends the status message to the admin user to remind him if everything is OK.
-
-
+                user_welcome_message = ":wave: BeyondMachines Slack bot successfully installed in your workspace.\n \
+                Only one more step to go!\n \
+                Add the BeyondMachines app to the #general channel of your workspace\n \
+                *Want to use a different channel?* Contact us via the https://www.beyondmachines.com/support/ using the email of the person that installed the BeyondMachines App\n \
+                \n \
+                What can you expect from us?\n \
+                • *Advisories* (things to take action on immediately) - at most once per day Mon - Thu at 9AM CET\n \
+                • *Event summaries* (important cybersecurity events around the world) - at most once per week\n \
+                • *Awareness messages* (one cybersecurity thing to remember) - once every two weeks\n"
+                status_result = client.chat_postMessage(channel=installation.user_id, text="<@"+installation.user_id+">"+user_welcome_message)  # this line sends the status message to the admin user to remind him if everything is OK.
                 # now we send a notification to the overall Slack admin to the beyondmachines app.
                 installation = installation_st.find_installation(enterprise_id="No_Ent_ID",team_id="TNMQGFG4F")
-                print(installation)
                 client = WebClient(token=installation.bot_token)
                 status_result = client.chat_postMessage(channel=installation.user_id, text="<@"+installation.user_id+">"+":wave: We have a new registered workspace "+installed_workspace_name)  # this line sends the status message to the admin user to remind him if everything is OK.
                 send_analytics(request, "Install Slack App - Success")
