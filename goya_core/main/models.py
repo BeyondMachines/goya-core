@@ -20,6 +20,7 @@ class SlackInstalledWorkspace(models.Model):  # this is a generic challenge mode
     admin_user_email = models.EmailField(blank=True, null=False)
     workspace_url = models.SlugField(max_length=200, blank=True, null=True)  # the slug text for the url
     workspace_joined_time = models.DateTimeField(blank=True, null=False, default=datetime.now)
+    workspace_default_channel = models.CharField(max_length=50, blank=True, null=False, default="general")
 
     class Meta:
         unique_together = ('enterprise_id', 'workspace_id')  # block duplicating of workspace records
@@ -34,3 +35,15 @@ class SlackInstalledWorkspace(models.Model):  # this is a generic challenge mode
         if not self.workspace_url:
             self.workspace_url = slugify(self.workspace_name + '-' + str(random.choices(string.ascii_uppercase + string.digits, k=4)))
         super(SlackInstalledWorkspace, self).save(*args, **kwargs)
+
+
+class MailingList(models.Model):  # this is a generic challenge model where all challenges are picked up from.
+    '''
+    The SlackInstalledWorkspace model contains the register of workspaces where the App is successfully installed.
+    '''
+    mailing_list_user_email = models.EmailField(blank=True, null=False, unique=True)
+    mailing_list_joined_time = models.DateTimeField(blank=True, null=False, default=datetime.now)
+
+    def __str__(self):
+        return self.mailing_list_user_email
+

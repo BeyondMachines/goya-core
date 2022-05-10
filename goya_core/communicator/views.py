@@ -50,20 +50,22 @@ def send_advisories_view(request, *args, **kwargs):
             client = WebClient(token=installation.bot_token)
             spacer_line = "===================================="
             message_text=""
+            reminder_message = "\n Make sure that you have added the BeyondMachines App to the appropriate channel so we can send awareness and advisories that reach all team members. \n \
+            Your workspace default channel is: "+workspace.workspace_default_channel
             for advisory in advisories:
                 message_text = "*"+advisory.advisory_title+"*" + "\n" + spacer_line + "\n" + markdown(advisory.advisory_details) + "\n\n"
                 try:
-                    client.chat_postMessage(channel='#general', text=message_text)
+                    client.chat_postMessage(channel='#'+workspace.workspace_default_channel, text=message_text)
                     update_workspace_advisory(workspace,datetime.now())
                     update_workspace_advisory_list(workspace,advisory,datetime.now())
                 except SlackApiError as error:
-                    message = "ERROR - We couldn't send an advisory. The error was:"+error.response['error']
+                    message_to_workspace_admin = "ERROR - We couldn't send an advisory. The error was:"+error.response['error']+reminder_message
                     # notify admin
-                    notify_admin(installation.user_id, installation.bot_token, message)
+                    notify_admin(installation.user_id, installation.bot_token, message_to_workspace_admin)
                     # notify superadmin
-                    message = message+" On workspace "+workspace.workspace_name
+                    message_to_superadmin = message+" On workspace "+workspace.workspace_name+" with chosen default channel:"+workspace.workspace_default_channel
                     installation1 = installation_store.find_installation(enterprise_id="No_Ent_ID",team_id="TNMQGFG4F")
-                    notify_admin(installation1.user_id, installation1.bot_token, message)
+                    notify_admin(installation1.user_id, installation1.bot_token, message_to_superadmin)
     return HttpResponse("Advisories Sent! Result: ")
 
 
@@ -101,21 +103,23 @@ def send_event_report_view(request, *args, **kwargs):
             spacer_line = "\n------------------------------------\n"
             delimiter_line = "\n++++++++++++++++++++++++++++++++++++\n"
             message_text= intro_line
+            reminder_message = "\n Make sure that you have added the BeyondMachines App to the appropriate channel so we can send awareness and advisories that reach all team members. \n \
+            Your workspace default channel is: "+workspace.workspace_default_channel
             for event_report in event_reports:
                 message_text = message_text + "*"+event_report.event_title+"*" + spacer_line + markdown(event_report.event_details) + delimiter_line
             try:
-                client.chat_postMessage(channel='#general', text=message_text)
+                client.chat_postMessage(channel='#'+workspace.workspace_default_channel, text=message_text)
                 update_workspace_event_report(workspace,datetime.now())
                 for event_report in event_reports:
                     update_workspace_event_list(workspace, event_report, datetime.now())
             except SlackApiError as error:
-                message = "ERROR - We couldn't send an event report. The error was:"+error.response['error']
+                message_to_workspace_admin = "ERROR - We couldn't send an event report. The error was:"+error.response['error']+reminder_message
                 # notify admin
-                notify_admin(installation.user_id, installation.bot_token, message)
+                notify_admin(installation.user_id, installation.bot_token, message_to_workspace_admin)
                 # notify superadmin
-                message = message+" On workspace "+workspace.workspace_name
+                message_to_superadmin = message+" On workspace "+workspace.workspace_name+" with chosen default channel:"+workspace.workspace_default_channel
                 installation1 = installation_store.find_installation(enterprise_id="No_Ent_ID",team_id="TNMQGFG4F")
-                notify_admin(installation1.user_id, installation1.bot_token, message)
+                notify_admin(installation1.user_id, installation1.bot_token, message_to_superadmin)
     return HttpResponse("Events Sent! Result: ")
 
 
@@ -171,3 +175,21 @@ def send_analytics(request, event):
     else:
         ip = request.META.get('REMOTE_ADDR')
     mp_eu.track(ip, event)
+
+
+def test_scheduler_advisory():
+    '''
+    internal function to test a schedule of advisory sending
+    '''
+    message_to_superadmin = "test scheduled message as advisory for 9AM mon-thursday"
+    installation1 = installation_store.find_installation(enterprise_id="No_Ent_ID",team_id="TNMQGFG4F")
+    notify_admin(installation1.user_id, installation1.bot_token, message_to_superadmin)
+
+
+def test_scheduler_event():
+    '''
+    internal function to test a schedule of advisory sending
+    '''
+    message_to_superadmin = "test scheduled message as advisory for 10AM thursday"
+    installation1 = installation_store.find_installation(enterprise_id="No_Ent_ID",team_id="TNMQGFG4F")
+    notify_admin(installation1.user_id, installation1.bot_token, message_to_superadmin)

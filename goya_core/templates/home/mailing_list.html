@@ -1,0 +1,37 @@
+{% extends 'general/base.html' %}
+{% load static %}
+
+{% block hero %}
+<div class="row">
+    <div class="col-12">
+        {% include 'home/hero.html' %}
+    </div>
+</div>
+{% endblock %}
+
+{% block main %}
+<div id="features" class="row bm-offset">
+    <div class="col-12">
+        {% block features %}
+            {% include 'home/features.html' %}
+        {% endblock %}
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        {% block how_it_works %}
+            {% include 'home/how_it_works.html' %}
+        {% endblock %}
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        {% block call_to_action %}
+            {% include 'home/call_to_action.html' %}
+        {% endblock %}
+    </div>
+</div>
+
+
+{% endblock %}
+
