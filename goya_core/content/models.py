@@ -4,6 +4,8 @@ from slugify import slugify
 import random
 import re
 from ckeditor.fields import RichTextField
+from taggit.managers import TaggableManager
+
 
 # import models
 from django.db import models
@@ -18,6 +20,8 @@ class Advisory(models.Model):  # this is a generic challenge model where all cha
     advisory_details = RichTextField(blank=False, null=False)
     advisory_url = models.SlugField(max_length=100, blank=True, null=True)  # the slug text for the url
     advisory_published_time = models.DateTimeField(blank=True, null=False, default=datetime.now)
+    tags = TaggableManager()  # the adding of tags to the challenge
+
 
     def __str__(self):
         return self.advisory_title
@@ -40,6 +44,7 @@ class RealLifeEvent(models.Model):  # this is a generic challenge model where al
     event_details = RichTextField(blank=False, null=False)
     event_url = models.SlugField(max_length=100, blank=True, null=True)  # the slug text for the url
     event_published_time = models.DateTimeField(blank=True, null=False, default=datetime.now)
+    tags = TaggableManager()  # the adding of tags to the challenge
 
     def __str__(self):
         return self.event_title

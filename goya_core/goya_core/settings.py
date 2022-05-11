@@ -107,6 +107,7 @@ INSTALLED_APPS = [
     'bootstrap5',
     'storages',  # needed for the django s3 static files
     'ckeditor',
+    'taggit',
 
 ]
 
@@ -264,3 +265,5 @@ SITE_ID = 1
 LOGIN_REDIRECT_URL = 'home'
 ACCOUNT_LOGOUT_REDIRECT_URL = 'home'
 ACCOUNT_PRESERVE_USERNAME_CASING = False
+
+TAGGIT_CASE_INSENSITIVE = True
