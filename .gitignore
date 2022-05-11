@@ -1,5 +1,6 @@
 # Project specific ignore parameters - local data store
 local_data_store/
+.DS_store
 
 # The local static files created during developmeny. 
 static_data/

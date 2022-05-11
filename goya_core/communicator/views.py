@@ -26,20 +26,7 @@ def send_advisories_view(request, *args, **kwargs):
     '''
     a view to send the individual advisory e-mail to take action because of a vulnerability or zero day attack.
     '''
-    client_id=str(settings.SLACK_CLIENT_ID)
-    client_secret=str(settings.SLACK_CLIENT_SECRET)
-    if str(settings.LOCAL_TEST) == 'True':  # preparing a place where the state store - Local is sqlite. Parameters are in settings, server is S3
-        installation_store = SQLite3InstallationStore(
-            database=settings.STATE_DB_NAME,
-            client_id=client_id
-        ) 
-    else:
-        s3_client = boto3.client("s3")
-        installation_store=AmazonS3InstallationStore(
-            s3_client=s3_client,
-            bucket_name="goya-slack-installation-store",
-            client_id=client_id
-        )
+    client_id, installation_store = get_slack_bot_installation_store()
     all_workspaces = SlackInstalledWorkspace.objects.all()
     # 
     for workspace in all_workspaces:
@@ -75,20 +62,7 @@ def send_event_report_view(request, *args, **kwargs):
     '''
     a view to send summary of real life events to all workspaces. Should be scheduled to run once per week. 
     '''
-    client_id=str(settings.SLACK_CLIENT_ID)
-    client_secret=str(settings.SLACK_CLIENT_SECRET)
-    if str(settings.LOCAL_TEST) == 'True':  # preparing a place where the state store - Local is sqlite. Parameters are in settings, server is S3
-        installation_store = SQLite3InstallationStore(
-            database=settings.STATE_DB_NAME,
-            client_id=client_id
-        ) 
-    else:
-        s3_client = boto3.client("s3")
-        installation_store=AmazonS3InstallationStore(
-            s3_client=s3_client,
-            bucket_name="goya-slack-installation-store",
-            client_id=client_id
-        )
+    client_id, installation_store = get_slack_bot_installation_store()
     all_workspaces = SlackInstalledWorkspace.objects.all()
     # 
     for workspace in all_workspaces:
@@ -181,6 +155,7 @@ def test_scheduler_advisory():
     '''
     internal function to test a schedule of advisory sending
     '''
+    client_id, installation_store = get_slack_bot_installation_store()
     message_to_superadmin = "test scheduled message as advisory for 9AM mon-thursday"
     installation1 = installation_store.find_installation(enterprise_id="No_Ent_ID",team_id="TNMQGFG4F")
     notify_admin(installation1.user_id, installation1.bot_token, message_to_superadmin)
@@ -190,6 +165,27 @@ def test_scheduler_event():
     '''
     internal function to test a schedule of advisory sending
     '''
+    client_id, installation_store = get_slack_bot_installation_store()
     message_to_superadmin = "test scheduled message as advisory for 10AM thursday"
     installation1 = installation_store.find_installation(enterprise_id="No_Ent_ID",team_id="TNMQGFG4F")
     notify_admin(installation1.user_id, installation1.bot_token, message_to_superadmin)
+
+
+def get_slack_bot_installation_store():
+    '''
+    internal function to get the installation_store for getting individual events. Returns the BeyondMachines slack app id as well as the installation store.
+    '''
+    client_id=str(settings.SLACK_CLIENT_ID)
+    if str(settings.LOCAL_TEST) == 'True':  # preparing a place where the state store - Local is sqlite. Parameters are in settings, server is S3
+        installation_store = SQLite3InstallationStore(
+            database=settings.STATE_DB_NAME,
+            client_id=client_id
+        ) 
+    else:
+        s3_client = boto3.client("s3")
+        installation_store=AmazonS3InstallationStore(
+            s3_client=s3_client,
+            bucket_name="goya-slack-installation-store",
+            client_id=client_id
+        )
+    return client_id, installation_store
