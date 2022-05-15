@@ -1,0 +1,34 @@
+{% extends 'general/base.html' %}
+{% load static %}
+
+{% block hero %}
+<div class="row">
+    <div class="col-12">
+        {% include 'management/hero.html' %}
+    </div>
+</div>
+{% endblock %}
+
+{% block main %}
+<div id="features" class="row bm-offset">
+    <div class="col-12">
+        {% block features %}
+        {% endblock %}
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        {% block how_it_works %}
+        {% endblock %}
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        {% block call_to_action %}
+        {% endblock %}
+    </div>
+</div>
+
+
+{% endblock %}
+

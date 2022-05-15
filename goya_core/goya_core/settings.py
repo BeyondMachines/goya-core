@@ -49,6 +49,7 @@ if os.environ.get('AWS_REGION'):  # Check whether AWS_REGION variable exists to 
     SLACK_CLIENT_ID = get_ssm_key('GOYA_SLACK_CLIENT_ID')
     SLACK_REDIRECT_URI = get_ssm_key('GOYA_SLACK_INSTALL_REDIRECT_URL')
     MIXPANEL_TOKEN= get_ssm_key('GOYA_MIXPANEL_TOKEN')
+    RSS_FEEDS= get_ssm_key('GOYA_RSS_FEEDS')
 else:
     LOCAL_TEST = True
     DEBUG = os.getenv('DJANGO_DEBUG', True)
@@ -59,6 +60,7 @@ else:
     SLACK_REDIRECT_URI= os.environ["SLACK_REDIRECT_URL"]  # the redirect URL set up in our app that the user will be redirected after the initial setup.
     STATE_DB_NAME = LOCAL_DATA_STORE / 'state_store.sqlite3'  # the database which keeps the Oauth request states for a local installation
     MIXPANEL_TOKEN= os.environ["MIXPANEL_TOKEN"]
+    RSS_FEEDS=os.environ["RSS_FEEDS"]
     ALLOWED_HOSTS = ['*']  # when running on localhost to allow extenal proxy connections
     USE_S3 = False  # tell the static file setup not to look for the S3 version of static files
 
