@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_http_methods # To restrict access to views based on the request method 
 from communicator.views import send_analytics
+from django.contrib.admin.views.decorators import staff_member_required
+
 
 # Create your views here.
 @require_http_methods(["GET"])
@@ -13,6 +15,16 @@ def home_view(request, *args, **kwargs):
     }
     return render(request, "home/home.html", context)
 
+@staff_member_required  # the message is protected. 
+@require_http_methods(["GET"])
+def management_view(request, *args, **kwargs):
+    '''
+    This is the management page view. It renders the buttons to run the delivery of services on a click of a button if automation fails
+    '''
+    send_analytics(request, "Open Management Page")
+    context = {
+    }
+    return render(request, "management/home.html", context)
 
 @require_http_methods(["POST"])
 def sandbox_view(request, *args, **kwargs):

@@ -8,19 +8,20 @@ import os
 from slack_sdk.web import WebClient
 from django.http import HttpResponseBadRequest, HttpResponse
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from markdownify import markdownify as markdown  # to convert html to markdown
 from slack_sdk.errors import SlackApiError
 from datetime import datetime    
 import mixpanel
 
 
-from content.models import Advisory, RealLifeEvent
+from content.models import Advisory, RealLifeEvent, EventSummary
 from main.models import SlackInstalledWorkspace
-from communicator.models import Latest_Advisory, Latest_Event_Report, Advisories_Sent, Events_Sent
+from communicator.models import Latest_Advisory, Latest_Event_Report, Advisories_Sent, EventSummary_Sent
 
 # Create your views here.
 
-@login_required  # the message is protected. 
+@staff_member_required  # the message is protected. 
 @require_http_methods(["GET"])
 def send_advisories_view(request, *args, **kwargs):
     '''
@@ -37,16 +38,17 @@ def send_advisories_view(request, *args, **kwargs):
             client = WebClient(token=installation.bot_token)
             spacer_line = "===================================="
             message_text=""
-            reminder_message = "\n Make sure that you have added the BeyondMachines App to the appropriate channel so we can send awareness and advisories that reach all team members. \n \
+            reminder_message = "\nMake sure that you have added the BeyondMachines App to the appropriate channel so we can send awareness and advisories that reach all team members. \n \
             Your workspace default channel is: "+workspace.workspace_default_channel
             for advisory in advisories:
-                message_text = "*"+advisory.advisory_title+"*" + "\n" + spacer_line + "\n" + markdown(advisory.advisory_details) + "\n\n"
+                message_text = ":warning:"+"*"+advisory.advisory_title+"*" + "\n" + spacer_line + "\n" + markdown(advisory.advisory_details) + "\n\n"
                 try:
                     client.chat_postMessage(channel='#'+workspace.workspace_default_channel, text=message_text)
                     update_workspace_advisory(workspace,datetime.now())
                     update_workspace_advisory_list(workspace,advisory,datetime.now())
                 except SlackApiError as error:
-                    message_to_workspace_admin = "ERROR - We couldn't send an advisory. The error was:"+error.response['error']+reminder_message
+                    message = "ERROR - We couldn't send an advisory. The error was:"+error.response['error']
+                    message_to_workspace_admin = message+reminder_message
                     # notify admin
                     notify_admin(installation.user_id, installation.bot_token, message_to_workspace_admin)
                     # notify superadmin
@@ -56,7 +58,7 @@ def send_advisories_view(request, *args, **kwargs):
     return HttpResponse("Advisories Sent! Result: ")
 
 
-@login_required  # the message is protected. 
+@staff_member_required  # the message is protected. 
 @require_http_methods(["GET"])
 def send_event_report_view(request, *args, **kwargs):
     '''
@@ -67,27 +69,28 @@ def send_event_report_view(request, *args, **kwargs):
     # 
     for workspace in all_workspaces:
         latest_event_report_time = Latest_Event_Report.objects.get(advised_workspace=workspace).latest_event_report_time
-        event_reports = RealLifeEvent.objects.filter(event_published_time__gt=latest_event_report_time)
-        print('Prepared for sending Events')
+        event_reports = EventSummary.objects.filter(summary_published_time__gt=latest_event_report_time)
+        print('Prepared for sending Event reports')
         if event_reports:
-            print('Got into sending Events')
+            print('Got into sending Event reports')
             installation = installation_store.find_installation(enterprise_id=workspace.enterprise_id,team_id=workspace.workspace_id)
             client = WebClient(token=installation.bot_token)
-            intro_line = "*Latest Cybersecurity Events and lessons learned* \n ==================================== \n\n"
+            intro_line = ":loudspeaker: *Latest Cybersecurity Events and lessons learned* \n====================================\n\n"
             spacer_line = "\n------------------------------------\n"
-            delimiter_line = "\n++++++++++++++++++++++++++++++++++++\n"
             message_text= intro_line
+            takeaway_line = ":eyes: *One thing to keep in mind*\n"
             reminder_message = "\n Make sure that you have added the BeyondMachines App to the appropriate channel so we can send awareness and advisories that reach all team members. \n \
             Your workspace default channel is: "+workspace.workspace_default_channel
             for event_report in event_reports:
-                message_text = message_text + "*"+event_report.event_title+"*" + spacer_line + markdown(event_report.event_details) + delimiter_line
+                message_text = message_text + "*"+event_report.summary_title+"*" + spacer_line + markdown(event_report.summary_details) + spacer_line + takeaway_line + "```"+event_report.summary_takeway +"```"
             try:
                 client.chat_postMessage(channel='#'+workspace.workspace_default_channel, text=message_text)
                 update_workspace_event_report(workspace,datetime.now())
                 for event_report in event_reports:
-                    update_workspace_event_list(workspace, event_report, datetime.now())
+                    update_workspace_event_summary_list(workspace, event_report, datetime.now())
             except SlackApiError as error:
-                message_to_workspace_admin = "ERROR - We couldn't send an event report. The error was:"+error.response['error']+reminder_message
+                message = "ERROR - We couldn't send an event report. The error was:"+error.response['error']
+                message_to_workspace_admin = message+reminder_message
                 # notify admin
                 notify_admin(installation.user_id, installation.bot_token, message_to_workspace_admin)
                 # notify superadmin
@@ -121,11 +124,11 @@ def update_workspace_event_report(workspace,time):
     return(obj)
 
 
-def update_workspace_event_list(workspace,event,time):
+def update_workspace_event_summary_list(workspace,event,time):
     '''
     internal function for registering sent events to workspace for analytics
     '''
-    obj = Events_Sent.objects.create(advised_workspace=workspace, event_sent=event, event_sent_time=time)
+    obj = EventSummary_Sent.objects.create(advised_workspace=workspace, event_summary_sent=event, event_summary_sent_time=time)
     return(obj)
 
 

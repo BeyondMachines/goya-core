@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from communicator.models import Latest_Advisory, Latest_Event_Report, Advisories_Sent, Events_Sent
+from communicator.models import Latest_Advisory, Latest_Event_Report, Advisories_Sent, Events_Sent, EventSummary_Sent
 
 # Register your models here.
 
@@ -29,3 +29,10 @@ class Events_SentAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Events_Sent, Events_SentAdmin)
+
+
+class EventSummary_SentAdmin(admin.ModelAdmin):
+    list_display = ('advised_workspace', 'event_summary_sent', 'event_summary_sent_time')
+
+
+admin.site.register(EventSummary_Sent, EventSummary_SentAdmin)
