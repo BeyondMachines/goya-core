@@ -100,3 +100,27 @@ class CandidateEvent(models.Model):  # this is a generic challenge model where a
 
     def __str__(self):
         return self.candidate_event_title
+
+
+
+class AwarenessMessage(models.Model):  # this is a generic challenge model where all challenges are picked up from.
+    '''
+    The AwarenessMessage model contains the awareness messages. 
+    '''
+    awareness_message_title = models.CharField(max_length=200, blank=False, null=False)
+    awareness_message_details = RichTextField(blank=False, null=False)
+    awareness_message_takeway = models.TextField(blank=False, null=False)
+    awareness_message_url = models.SlugField(max_length=100, blank=True, null=True)  # the slug text for the url
+    awareness_message_published_time = models.DateTimeField(blank=True, null=False, default=datetime.now)
+    tags = TaggableManager()  # the adding of tags to the challenge
+
+    def __str__(self):
+        return self.awareness_message_title
+
+    def title_no_spaces(self):
+        return re.sub('[^a-zA-Z0-9]', '_', self.awareness_message_title)  # use regex to replace anything non alphanumeric with underscore
+
+    def save(self, *args, **kwargs):  # the autogeneration of the slug for the challenge
+        if not self.awareness_message_url:
+            self.awareness_message_url = slugify(self.awareness_message_title + '-' + str(random.choices(string.ascii_uppercase + string.digits, k=4)))
+        super(AwarenessMessage, self).save(*args, **kwargs)
