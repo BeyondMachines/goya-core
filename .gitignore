@@ -2,9 +2,10 @@
 local_data_store/
 .DS_store
 */prototype*.py
+prototype/
 
 # The local static files created during developmeny. 
-static_data/
+# static_data/
 
 # The local static files populated during collectstatic. 
 static_assets/
