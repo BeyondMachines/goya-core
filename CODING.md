@@ -48,3 +48,13 @@ In the commit message and in the Pull Request description summarize the type of 
 `docs:` Everything related to documentation
 `chore:` Regular code maintenance
 `security:` Updates specific to security
+
+
+### removing secrets from code
+If you have accidentally added a file with secrets, you need to remove it from all branches of the repo.
+NOTE - test the command below on multiple test versions before you commit to executing the command.
+```
+git filter-branch --force --index-filter \
+    "git rm --cached --ignore-unmatch <your-file>" \
+    --prune-empty --tag-name-filter cat -- --all
+```

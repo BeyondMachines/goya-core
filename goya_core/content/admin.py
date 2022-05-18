@@ -1,5 +1,5 @@
 from django.contrib import admin
-from content.models import Advisory, RealLifeEvent, EventSummary, CandidateEvent
+from content.models import Advisory, RealLifeEvent, EventSummary, CandidateEvent, AwarenessMessage
 
 # Register your models here.
 
@@ -36,5 +36,17 @@ class CandidateEventAdmin(admin.ModelAdmin):
         return u", ".join(o.name for o in obj.tags.all())
 
 
-
 admin.site.register(CandidateEvent, CandidateEventAdmin)
+
+
+class AwarenessMessageAdmin(admin.ModelAdmin):
+    list_display = ('awareness_message_title', 'awareness_message_published_time','tag_list')
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related('tags')
+
+    def tag_list(self, obj):
+        return u", ".join(o.name for o in obj.tags.all())
+
+
+admin.site.register(AwarenessMessage, AwarenessMessageAdmin)
