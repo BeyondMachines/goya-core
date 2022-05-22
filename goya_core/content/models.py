@@ -18,7 +18,7 @@ class Advisory(models.Model):  # this is a generic challenge model where all cha
     '''
     advisory_title = models.CharField(max_length=200, blank=False, null=False)
     advisory_details = RichTextField(blank=False, null=False)
-    advisory_url = models.SlugField(max_length=100, blank=True, null=True)  # the slug text for the url
+    advisory_url = models.SlugField(max_length=220, blank=True, null=True)  # the slug text for the url
     advisory_published_time = models.DateTimeField(blank=True, null=False, default=datetime.now)
     tags = TaggableManager()  # the adding of tags to the challenge
 
@@ -42,7 +42,7 @@ class RealLifeEvent(models.Model):  # this is a generic challenge model where al
     '''
     event_title = models.CharField(max_length=200, blank=False, null=False)
     event_details = RichTextField(blank=False, null=False)
-    event_url = models.SlugField(max_length=100, blank=True, null=True)  # the slug text for the url
+    event_url = models.SlugField(max_length=220, blank=True, null=True)  # the slug text for the url
     event_source_url = models.URLField(max_length=400, blank=False, null=False, default='https://localhost')
     event_published_time = models.DateTimeField(blank=True, null=False, default=datetime.now)
     tags = TaggableManager()  # the adding of tags to the challenge
@@ -68,7 +68,7 @@ class EventSummary(models.Model):  # this is a generic challenge model where all
     summary_title = models.CharField(max_length=200, blank=False, null=False)
     summary_details = RichTextField(blank=False, null=False)
     summary_takeway = models.TextField(blank=False, null=False)
-    summary_url = models.SlugField(max_length=100, blank=True, null=True)  # the slug text for the url
+    summary_url = models.SlugField(max_length=220, blank=True, null=True)  # the slug text for the url
     summary_published_time = models.DateTimeField(blank=True, null=False, default=datetime.now)
     tags = TaggableManager()  # the adding of tags to the challenge
 
@@ -110,7 +110,7 @@ class AwarenessMessage(models.Model):  # this is a generic challenge model where
     awareness_message_title = models.CharField(max_length=200, blank=False, null=False)
     awareness_message_details = RichTextField(blank=False, null=False)
     awareness_message_takeway = models.TextField(blank=False, null=False)
-    awareness_message_url = models.SlugField(max_length=100, blank=True, null=True)  # the slug text for the url
+    awareness_message_url = models.SlugField(max_length=220, blank=True, null=True)  # the slug text for the url
     awareness_message_published_time = models.DateTimeField(blank=True, null=False, default=datetime.now)
     tags = TaggableManager()  # the adding of tags to the challenge
 
