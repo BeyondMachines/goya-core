@@ -104,6 +104,7 @@ INSTALLED_APPS = [
     'content',
     'slack_app',
     'communicator',
+    'projectflatpages',
 
     # third party tools
     'bootstrap5',

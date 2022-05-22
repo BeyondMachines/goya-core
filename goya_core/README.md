@@ -7,6 +7,7 @@ This is the root folder of the **goya_core** Django project.
 - _main_ - The main app of the project. Will contain only the public pages/content interface. The UI is Bootrap 5 based.
 - _content_ - The app that will contain the final content and advisories sent to the consumers.
 - _slack_app_ - The app that will run the Slack integration
+- _projectflatpages_ - The app exists only to provide configuration parameters for the flatpafes CKeditor integration.
 
 
 ## Technologies/libraries used
