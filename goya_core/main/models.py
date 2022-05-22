@@ -37,17 +37,17 @@ class SlackInstalledWorkspace(models.Model):  # this is a generic challenge mode
     workspace_advisory_shout = models.CharField(
         max_length=10,
         choices=MESSAGE_CHOICES,
-        default='<!channel>'
+        default='CHANNEL'
     )
     workspace_awareness_shout = models.CharField(
         max_length=10,
         choices=MESSAGE_CHOICES,
-        default='<!here>'
+        default='PRESENT'
     )
     workspace_event_shout = models.CharField(
         max_length=10,
         choices=MESSAGE_CHOICES,
-        default='All'
+        default='QUIET'
     )
 
     class Meta:

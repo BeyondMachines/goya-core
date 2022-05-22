@@ -17,6 +17,11 @@
         "certificate_arn": "arn_of_the_certificate_you_created_in_AWS_Certificate_Manager",
         "domain": "your_custom_domain",
         "debug": false,
-        "log_level": "INFO"
+        "log_level": "INFO",
+        "events": [{
+            "function": "communicator.views.send_advisories_view",
+            "expression": "cron(0 9 ? * MON-THU *)"
+        }
+        ]
     }
 }

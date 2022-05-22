@@ -52,3 +52,36 @@
 .bg-linkedin {
   background-color: #0082ca !important;
 }
+
+
+.btn-outline-custom-primary {
+  color: #3d445f;
+  border-color: #3d445f;
+}
+
+.btn-outline-custom-primary:hover {
+  color: #fff;
+  background-color: #5B6382;
+  border-color: #5B6382;
+}
+
+.btn-outline-custom-primary:focus, .btn-outline-custom-primary.focus {
+  box-shadow: 0 0 0 0.2rem rgba(61, 68, 95, 0.5);
+}
+
+.btn-outline-custom-primary.disabled, .btn-outline-custom-primary:disabled {
+  color: #5B6382;
+  background-color: transparent;
+}
+
+.btn-outline-custom-primary:not(:disabled):not(.disabled):active, .btn-outline-custom-primary:not(:disabled):not(.disabled).active,
+.show > .btn-utline-custom-primary.dropdown-toggle {
+  color: #fff;
+  background-color: #5B6382;
+  border-color: #5B6382;
+}
+
+.btn-outline-custom-primary:not(:disabled):not(.disabled):active:focus, .btn-outline-custom-primary:not(:disabled):not(.disabled).active:focus,
+.show > .btn-outline-custom-primary.dropdown-toggle:focus {
+  box-shadow: 0 0 0 0.2rem rgba(61, 68, 95, 0.5);
+}
