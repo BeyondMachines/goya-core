@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from main.views import home_view, err_handler400, err_handler403, err_handler404, err_handler500, management_view
+from main.views import home_view, err_handler400, err_handler403, err_handler404, err_handler500, management_view, contact_view
 from slack_app.views import slack_install_view, slack_callback_view
 from communicator.views import send_advisories_view, send_event_report_view
 from content.views import get_event_candidates_from_rss
@@ -31,6 +31,7 @@ urlpatterns = [
     path('admin/doc/', include('django.contrib.admindocs.urls')),
     path('admin/', admin.site.urls),
     path('', home_view, name='home'),
+    path('contact/', contact_view, name='contact'),
     path('management/', management_view, name='management'),
     path('slack/install', slack_install_view, name='slack_install'),
     path('slack/oauth/callback', slack_callback_view, name='slack_callback'),

@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect
 from django.views.decorators.http import require_http_methods # To restrict access to views based on the request method 
 from communicator.views import send_analytics
 from django.contrib.admin.views.decorators import staff_member_required
+from django.http import HttpResponseBadRequest, HttpResponse
+
 
 
 # Create your views here.
@@ -14,6 +16,16 @@ def home_view(request, *args, **kwargs):
     context = {
     }
     return render(request, "home/home.html", context)
+
+@require_http_methods(["GET"])
+def contact_view(request, *args, **kwargs):
+    '''
+    This is the contact page view. It renders the contact us page of the application
+    '''
+    send_analytics(request, "Open Contact Page")
+    context = {
+    }
+    return render(request, "home/contact.html", context)
 
 @staff_member_required  # the message is protected. 
 @require_http_methods(["GET"])
