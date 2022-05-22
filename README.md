@@ -39,6 +39,8 @@ SLACK_CLIENT_ID=your_app_id
 SLACK_CLIENT_SECRET=your_app_secret
 SLACK_SIGNING_SECRET=your_app_signing_secret
 SLACK_REDIRECT_URL=https://some_url_you_chose/slack/oauth/callback
+MIXPANEL_TOKEN=mixpanel_token
+RSS_FEEDS=rss_feed
 ```
 # Roadmap
 - Implement a content server (django)
