@@ -18,6 +18,7 @@ class Advisory(models.Model):  # this is a generic challenge model where all cha
     '''
     advisory_title = models.CharField(max_length=200, blank=False, null=False)
     advisory_details = RichTextField(blank=False, null=False)
+    advisory_takeway = models.TextField(blank=False, null=False, default=" ")
     advisory_url = models.SlugField(max_length=220, blank=True, null=True)  # the slug text for the url
     advisory_published_time = models.DateTimeField(blank=True, null=False, default=datetime.now)
     tags = TaggableManager()  # the adding of tags to the challenge

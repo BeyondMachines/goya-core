@@ -5,7 +5,7 @@
         "project_name": "project-name",
         "runtime": "python3.8",
         "s3_bucket": "bucket-name",
-        "exclude": ["*.md","CODEOWNERS","github_key.txt", "secret_key.txt", "*.sqlite3", "posgtres_env.json","static_assets","static_data","*.code-workspace","Dockerfile","docker-compose.yml","local_data_store","zappashell.sh"],
+        "exclude": ["local_data_store",".git","*.md","CODEOWNERS","github_key.txt", "secret_key.txt", "*.sqlite3", "posgtres_env.json","static_assets","static_data","*.code-workspace","Dockerfile","docker-compose.yml","local_data_store","zappashell.sh"],
         "timeout_seconds": 600,
         "manage_roles": false,
         "role_name": "production_role",
