@@ -6,10 +6,23 @@ import random
 
 # Create your models here.
 
+MESSAGE_CHOICES = [
+    ('FR', 'Freshman'),
+    ('SO', 'Sophomore'),
+    ('JR', 'Junior'),
+    ('SR', 'Senior'),
+    ('GR', 'Graduate'),
+]
+
 class SlackInstalledWorkspace(models.Model):  # this is a generic challenge model where all challenges are picked up from.
     '''
     The SlackInstalledWorkspace model contains the register of workspaces where the App is successfully installed.
     '''
+    MESSAGE_CHOICES = [
+    ('<!channel>', 'CHANNEL'),
+    ('<!here>', 'PRESENT'),
+    ('All', 'QUIET'),
+    ]
     workspace_name = models.CharField(max_length=100, blank=False, null=False)
     enterprise_id = models.CharField(max_length=50, blank=False, null=False)
     is_enterprise_install = models.BooleanField(blank=True, null=True)  # the slug text for the url
@@ -21,6 +34,21 @@ class SlackInstalledWorkspace(models.Model):  # this is a generic challenge mode
     workspace_url = models.SlugField(max_length=200, blank=True, null=True)  # the slug text for the url
     workspace_joined_time = models.DateTimeField(blank=True, null=False, default=datetime.now)
     workspace_default_channel = models.CharField(max_length=50, blank=True, null=False, default="general")
+    workspace_advisory_shout = models.CharField(
+        max_length=10,
+        choices=MESSAGE_CHOICES,
+        default='<!channel>'
+    )
+    workspace_awareness_shout = models.CharField(
+        max_length=10,
+        choices=MESSAGE_CHOICES,
+        default='<!here>'
+    )
+    workspace_event_shout = models.CharField(
+        max_length=10,
+        choices=MESSAGE_CHOICES,
+        default='All'
+    )
 
     class Meta:
         unique_together = ('enterprise_id', 'workspace_id')  # block duplicating of workspace records

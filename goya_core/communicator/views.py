@@ -36,15 +36,15 @@ def send_advisories_view(request, *args, **kwargs):
         if advisories:
             installation = installation_store.find_installation(enterprise_id=workspace.enterprise_id,team_id=workspace.workspace_id)
             client = WebClient(token=installation.bot_token)
-            shout_signal = "<!here>\n"
-            intro_line = ":warning: *Cybersecurity Advisory - please read and take action!* \n====================================\n\n"
+            shout_signal = workspace.workspace_advisory_shout
+            intro_line = ":warning: "+shout_signal+" *Cybersecurity Advisory - please read and take action!* \n====================================\n\n"
             spacer_line = "\n------------------------------------\n"
             takeaway_line = ":exclamation: *Take action now!*\n"
             message_text=""
             reminder_message = "\nMake sure that you have added the BeyondMachines App to the appropriate channel so we can send awareness and advisories that reach all team members. \n \
             Your workspace default channel is: "+workspace.workspace_default_channel
             for advisory in advisories:
-                message_text = shout_signal+intro_line+"*"+advisory.advisory_title+"*"+ spacer_line + markdown(advisory.advisory_details) + spacer_line + takeaway_line + "```"+advisory.advisory_takeway +"```"
+                message_text = intro_line+"*"+advisory.advisory_title+"*"+ spacer_line + markdown(advisory.advisory_details) + spacer_line + takeaway_line + "```"+advisory.advisory_takeway +"```"
                 try:
                     client.chat_postMessage(channel='#'+workspace.workspace_default_channel, text=message_text)
                     update_workspace_advisory(workspace,datetime.now())
@@ -78,7 +78,8 @@ def send_event_report_view(request, *args, **kwargs):
             print('Got into sending Event reports')
             installation = installation_store.find_installation(enterprise_id=workspace.enterprise_id,team_id=workspace.workspace_id)
             client = WebClient(token=installation.bot_token)
-            intro_line = ":loudspeaker: *Latest Cybersecurity Events and lessons learned* \n====================================\n\n"
+            shout_signal = workspace.workspace_event_shout
+            intro_line = ":loudspeaker: "+shout_signal+" *Latest Cybersecurity Events and lessons learned* \n====================================\n\n"
             spacer_line = "\n------------------------------------\n"
             message_text= intro_line
             takeaway_line = ":eyes: *One thing to keep in mind*\n"
