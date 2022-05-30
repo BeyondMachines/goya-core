@@ -29,8 +29,8 @@ class Latest_Awareness(models.Model):
     '''
     model to store the latest time an awareness message was successfully sent per each workspace
     '''
-    advised_workspace = models.ForeignKey(SlackInstalledWorkspace, blank=False, null=True, on_delete=models.CASCADE, related_name='awareness_advised_workspace')  # may want to validate proper challenge reference
-    # latest_advisory_sent = models.ForeignKey(Advisory, blank=True, null=True, on_delete=models.SET_NULL, related_name='latest_advisory')  # may want to validate proper participant reference
+    advised_workspace = models.OneToOneField(SlackInstalledWorkspace, null=True, on_delete=models.CASCADE, related_name='awareness_advised_workspace')  # may want to validate proper challenge reference
+    latest_awareness_message = models.ForeignKey(AwarenessMessage, blank=True, null=True, on_delete=models.SET_NULL, related_name='latest_awareness')  # may want to validate proper participant reference
     latest_awareness_time = models.DateTimeField(blank=True, null=False, default=datetime.now)
 
 
