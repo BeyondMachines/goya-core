@@ -1,5 +1,5 @@
 from django.contrib import admin
-from content.models import Advisory, RealLifeEvent, EventSummary, CandidateEvent, AwarenessMessage
+from content.models import Advisory, RealLifeEvent, EventSummary, CandidateEvent, AwarenessMessage, AwarenessCategory
 
 # Register your models here.
 
@@ -40,7 +40,7 @@ admin.site.register(CandidateEvent, CandidateEventAdmin)
 
 
 class AwarenessMessageAdmin(admin.ModelAdmin):
-    list_display = ('awareness_message_title', 'awareness_message_published_time','tag_list')
+    list_display = ('awareness_message_title', 'awareness_category', 'awareness_message_published_time','tag_list')
 
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related('tags')
@@ -50,3 +50,10 @@ class AwarenessMessageAdmin(admin.ModelAdmin):
 
 
 admin.site.register(AwarenessMessage, AwarenessMessageAdmin)
+
+
+class AwarenessCategoryAdmin(admin.ModelAdmin):
+    list_display = ('awareness_category', 'awareness_category_id')
+
+
+admin.site.register(AwarenessCategory, AwarenessCategoryAdmin)

@@ -12,7 +12,7 @@ from django.db import models
 
 # Create your models here.
 
-class Advisory(models.Model):  # this is a generic challenge model where all challenges are picked up from.
+class Advisory(models.Model):  
     '''
     The Advisory model contains the individual advisories that are created for sending as immediate messages.
     '''
@@ -37,7 +37,7 @@ class Advisory(models.Model):  # this is a generic challenge model where all cha
         super(Advisory, self).save(*args, **kwargs)
 
 
-class RealLifeEvent(models.Model):  # this is a generic challenge model where all challenges are picked up from.
+class RealLifeEvent(models.Model):  
     '''
     The RealLifeEvents model contains the individual events that happen during and are used for awareness examples. 
     '''
@@ -62,7 +62,7 @@ class RealLifeEvent(models.Model):  # this is a generic challenge model where al
 
 
 
-class EventSummary(models.Model):  # this is a generic challenge model where all challenges are picked up from.
+class EventSummary(models.Model):  
     '''
     The EventSummary model contains the aggregation of the individual events that's sent to users as weekly awareness sessions. 
     '''
@@ -86,7 +86,7 @@ class EventSummary(models.Model):  # this is a generic challenge model where all
 
 
 
-class CandidateEvent(models.Model):  # this is a generic challenge model where all challenges are picked up from.
+class CandidateEvent(models.Model):  
     '''
     The CandidateEvent model contains the events automatically parsed for filtering and review. 
     '''
@@ -104,10 +104,22 @@ class CandidateEvent(models.Model):  # this is a generic challenge model where a
 
 
 
-class AwarenessMessage(models.Model):  # this is a generic challenge model where all challenges are picked up from.
+class AwarenessCategory(models.Model):  
+    '''
+    The AwarenessCategory model contains the events automatically parsed for filtering and review. 
+    '''
+    awareness_category = models.CharField(max_length=200, blank=False, null=False)
+    awareness_category_id = models.IntegerField(blank=False, null=False, unique=True)
+
+    def __str__(self):
+        return self.awareness_category
+
+
+class AwarenessMessage(models.Model):  
     '''
     The AwarenessMessage model contains the awareness messages. 
     '''
+    awareness_category = models.ForeignKey(AwarenessCategory, blank=False, null=True, on_delete=models.SET_NULL)  # may want to validate proper challenge reference
     awareness_message_title = models.CharField(max_length=200, blank=False, null=False)
     awareness_message_details = RichTextField(blank=False, null=False)
     awareness_message_takeway = models.TextField(blank=False, null=False)
@@ -125,3 +137,4 @@ class AwarenessMessage(models.Model):  # this is a generic challenge model where
         if not self.awareness_message_url:
             self.awareness_message_url = slugify(self.awareness_message_title + '-' + str(random.choices(string.ascii_uppercase + string.digits, k=4)))
         super(AwarenessMessage, self).save(*args, **kwargs)
+
