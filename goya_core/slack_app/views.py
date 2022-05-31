@@ -225,3 +225,15 @@ def design_page_view(request, *args, **kwargs):
     return render(request, "slack_app/install_exists.html", context)
 
 
+@require_http_methods(["GET"])
+def slack_sandbox_invite_view(request, *args, **kwargs):
+    '''
+    This is the view that provides the install page where the users will click on the installation of the application. 
+    this may need to be changed later to make it simpler for users to find and use this app (maybe put it on the home page
+    '''
+    generated_url = settings.SANDBOX_SLACK_INVITE
+    context = {
+        'generated_url': generated_url
+    }
+    # return render(request, "slack_app/slack_install.html", context)
+    return redirect(generated_url)
