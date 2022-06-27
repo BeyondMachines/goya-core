@@ -5,6 +5,7 @@ import random
 import re
 from ckeditor.fields import RichTextField
 from taggit.managers import TaggableManager
+from django.conf import settings
 
 
 # import models
@@ -125,6 +126,8 @@ class AwarenessMessage(models.Model):
     awareness_message_takeway = models.TextField(blank=False, null=False)
     awareness_message_url = models.SlugField(max_length=220, blank=True, null=True)  # the slug text for the url
     awareness_message_published_time = models.DateTimeField(blank=True, null=False, default=datetime.now)
+    awareness_message_image = models.ImageField(blank=True, null=True,
+                                     upload_to="media_upload/awareness/upload/%Y/%m/%d/", max_length=255)
     tags = TaggableManager()  # the adding of tags to the challenge
 
     def __str__(self):

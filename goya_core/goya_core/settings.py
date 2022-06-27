@@ -113,7 +113,7 @@ INSTALLED_APPS = [
     'storages',  # needed for the django s3 static files
     'ckeditor',
     'taggit',
-
+    'django_cleanup.apps.CleanupConfig',  # this app needs to be last on the installed apps to function correctly and delete files from storage after being deleted from model.
 ]
 
 MIDDLEWARE = [
@@ -214,14 +214,20 @@ USE_TZ = True
 
 if str(LOCAL_TEST) == 'True':
     STATIC_FILE_PATH = BASE_DIR
+    MEDIA_FILE_PATH = BASE_DIR
     STATIC_ROOT = os.path.join(STATIC_FILE_PATH, 'static_assets/')
+    MEDIA_ROOT = os.path.join(MEDIA_FILE_PATH, 'media_assets/')
     STATIC_URL = 'static/'
+    MEDIA_URL = 'media/'
+
 else:  # important, the below code is not finished yet!
     if str(USE_S3) == 'True':
-        AWS_STORAGE_BUCKET_NAME = get_ssm_key('GOYA_S3_AWS_STORAGE_BUCKET_NAME')  # get the key for API access to S3
+        AWS_MEDIA_BUCKET_NAME = get_ssm_key('GOYA_S3_AWS_MEDIA_BUCKET_NAME')  # get the key for Media access to S3
+        AWS_STORAGE_BUCKET_NAME = get_ssm_key('GOYA_S3_AWS_STORAGE_BUCKET_NAME')  # get the key for Static access to S3
         # AWS_STORAGE_BUCKET_NAME = 'codeonion-static-test.s3.us-east-2.amazonaws.com'  # get the key for API access to S3
-        AWS_DEFAULT_ACL = 'public-read'
+        # AWS_DEFAULT_ACL = 'public-read'
         AWS_S3_CUSTOM_ROOT = f'{AWS_STORAGE_BUCKET_NAME}'
+        # AWS_S3_MEDIA_ROOT = f'{AWS_STORAGE_BUCKET_NAME}'
         AWS_S3_CUSTOM_DOMAIN = 'pubcdn.beyondmachines.net'  # to allow for cdn use
         AWS_S3_OBJECT_PARAMETERS = {
             'CacheControl': 'max-age=86400'
@@ -229,18 +235,22 @@ else:  # important, the below code is not finished yet!
         AWS_IS_GZIPPED = True
 
         # s3 static settings
-        AWS_STATIC_LOCATION = '' 
+        AWS_STATIC_LOCATION = ''
         # STATIC_URL = 'https://%s/%s/' % (AWS_S3_ENDPOINT_URL, AWS_STATIC_LOCATION)
         # STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_STATIC_LOCATION}/'  # setting before the CDN - keeping this as backup to use for static root
         # STATIC_ROOT = STATIC_URL  # setting before the CDN - keeping this as backup
-        STATIC_ROOT = f'https://{AWS_S3_CUSTOM_ROOT}/{AWS_STATIC_LOCATION}/'
-        STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_STATIC_LOCATION}/'
+        STATIC_ROOT = f'https://{AWS_S3_CUSTOM_ROOT}/{AWS_STATIC_LOCATION}'
+        STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_STATIC_LOCATION}'
         STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+        DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
     else:  # this is a special case for cloud version where we need local file serving. Should not be used. 
         STATIC_FILE_PATH = os.getenv('DJANGO_STATIC_PATH')
+        MEDIA_FILE_PATH = os.getenv('DJANGO_MEDIA_PATH')
         STATIC_ROOT = os.path.join(STATIC_FILE_PATH, 'static_assets/')
-        STATIC_URL = '/static/'
+        MEDIA_ROOT = os.path.join(MEDIA_FILE_PATH, 'media_assets/')
+        STATIC_URL = 'static/'
+        MEDIA_URL = 'media/'
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static_data/')
