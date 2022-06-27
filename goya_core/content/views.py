@@ -12,8 +12,19 @@ import re
 import datetime
 import json
 
-from content.models import CandidateEvent
+from content.models import CandidateEvent, AwarenessMessage
 # Create your views here.
+
+@staff_member_required  # the message is protected. 
+@require_http_methods(["GET"])
+def list_awareness_message(request):
+    awareness_messages = AwarenessMessage.objects.all()
+    # return HttpResponse("<h1>Home Page</h1>")
+    context = {
+        'awareness_messages': awareness_messages,
+    }
+    return render(request, "content/list_awareness.html", context)
+
 
 @staff_member_required  # the message is protected. 
 @require_http_methods(["GET"])
