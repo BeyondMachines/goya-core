@@ -1,0 +1,46 @@
+{% extends 'general/base.html' %}
+{% load static %}
+
+{% block hero %}
+
+{% endblock %}
+
+{% block main %}
+
+
+<div class="row justify-content-center mb-2">
+    <div class="col-10">
+        {% for message in awareness_messages %}
+        <div class="card">
+            <div class="card-header">
+                <strong>{{message.awareness_message_title}}</strong>
+            </div>
+            <div class="card-header">
+                Category: {{message.awareness_category}}</a>
+            </div>
+            <div class="card-body">
+                <div class="card-group">
+                    <div class="card border-0">
+                        <div class="card-body">
+                            {{message.awareness_message_details | safe }}
+                        </div>
+                    </div>
+                    <div class="card">
+                        {% if message.awareness_message_image %}
+                            <img class="card-img-top" src={{message.awareness_message_image.url}}>
+                        {% else %}
+                            No Image Uploaded to Post.
+                        {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+
+
+{% endblock %}
+

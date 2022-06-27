@@ -1,5 +1,4 @@
 from nis import cat
-from django.shortcuts import render
 from django.views.decorators.http import require_http_methods # To restrict access to views based on the request method 
 from django.conf import settings
 from slack_sdk.oauth.installation_store.sqlite3 import SQLite3InstallationStore
@@ -8,13 +7,15 @@ import boto3
 import os
 from slack_sdk.web import WebClient
 from django.http import HttpResponseBadRequest, HttpResponse
-from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from markdownify import markdownify as markdown  # to convert html to markdown
 from slack_sdk.errors import SlackApiError
 from datetime import datetime    
 import mixpanel
 from django.db.models import Max, Q, Prefetch, FilteredRelation, Subquery
+from urllib.request import urlopen
+from django.conf import settings
+
 
 
 from content.models import Advisory, RealLifeEvent, EventSummary, AwarenessMessage, AwarenessCategory
@@ -75,9 +76,7 @@ def send_event_report_view(request, *args, **kwargs):
     for workspace in all_workspaces:
         latest_event_report_time = Latest_Event_Report.objects.get(advised_workspace=workspace).latest_event_report_time
         event_reports = EventSummary.objects.filter(summary_published_time__gt=latest_event_report_time)
-        print('Prepared for sending Event reports')
         if event_reports:
-            print('Got into sending Event reports')
             installation = installation_store.find_installation(enterprise_id=workspace.enterprise_id,team_id=workspace.workspace_id)
             client = WebClient(token=installation.bot_token)
             shout_signal = workspace.workspace_event_shout
@@ -116,7 +115,6 @@ def send_awareness_message_view(request, *args, **kwargs):
     client_id, installation_store = get_slack_bot_installation_store()
     all_workspaces = SlackInstalledWorkspace.objects.all()
     category_counter = AwarenessCategory.objects.count()  # get the max number of category IDs to loop though for each workspace to find next post to be sent
-    print(category_counter)
     for workspace in all_workspaces:
         latest_awareness_message = Latest_Awareness.objects.filter(advised_workspace=workspace).first()  # get the latest awareness message for the workspace
         if latest_awareness_message:  # if there was a message sent before, filter the rest of the available awareness posts to find the next post
@@ -129,14 +127,12 @@ def send_awareness_message_view(request, *args, **kwargs):
                 next_message = AwarenessMessage.objects.exclude(awareness_message_sent_to_workspace__advised_workspace=workspace).filter(awareness_category=next_category).first()
                 if attempted_categories > category_counter+1: 
                     break
-            print(next_message)                
         else:
             next_category = -1
             next_message = None
             while next_message == None:
                 next_category = (next_category+1) % category_counter  # use modulo to loop through the 
                 next_message = AwarenessMessage.objects.filter(awareness_category=next_category).first()
-            print(next_message)
 
         if next_message != None:
             installation = installation_store.find_installation(enterprise_id=workspace.enterprise_id,team_id=workspace.workspace_id)
@@ -150,7 +146,13 @@ def send_awareness_message_view(request, *args, **kwargs):
             Your workspace default channel is: "+workspace.workspace_default_channel
             message_text = message_text + "*"+next_message.awareness_message_title+"*" + spacer_line + markdown(next_message.awareness_message_details) + spacer_line + takeaway_line + "```"+next_message.awareness_message_takeway +"```"
             try:
-                client.chat_postMessage(channel='#'+workspace.workspace_default_channel, text=message_text)
+                if next_message.awareness_message_image:
+                    image_url = settings.CUSTOM_DOMAIN+next_message.awareness_message_image.url
+                    f = urlopen(image_url)
+                    file_name = f.read()
+                    client.files_upload(channels='#'+workspace.workspace_default_channel, initial_comment=message_text, file=file_name)
+                else:
+                    client.chat_postMessage(channel='#'+workspace.workspace_default_channel, text=message_text)
                 update_workspace_awareness(workspace, next_message, datetime.now())
                 update_workspace_awareness_list(workspace, next_message, datetime.now())
             except SlackApiError as error:

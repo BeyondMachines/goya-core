@@ -38,7 +38,7 @@ def slack_install_view(request, *args, **kwargs):
             bucket_name="goya-slack-state-store",
             expiration_seconds=300,  # the default value: 10 minutes
         ),
-    authorize_url_generator = AuthorizeUrlGenerator(client_id=str(settings.SLACK_CLIENT_ID),scopes=["chat:write","team:read"],user_scopes=["identity.basic","identity.email"],)  # this version is not elegant, there is no central management of scopes but for MVP good enough. 
+    authorize_url_generator = AuthorizeUrlGenerator(client_id=str(settings.SLACK_CLIENT_ID),scopes=["chat:write","team:read","files:write"],user_scopes=["identity.basic","identity.email"],)  # this version is not elegant, there is no central management of scopes but for MVP good enough. 
     if type(state_store) is tuple:  # this piece of code is needed because the AmazonS3OAuthStateStore returns a tuple.
         state_st = state_store[0]
     else:
@@ -145,7 +145,8 @@ def slack_callback_view(request, *args, **kwargs):
                     installation_store = SQLite3InstallationStore(
                         database=settings.STATE_DB_NAME,
                         client_id=client_id
-                    ) 
+                    )
+                    installation_st = installation_store
                 else:
                     s3_client = boto3.client("s3")
                     installation_store=AmazonS3InstallationStore(

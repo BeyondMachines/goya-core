@@ -217,8 +217,10 @@ if str(LOCAL_TEST) == 'True':
     MEDIA_FILE_PATH = BASE_DIR
     STATIC_ROOT = os.path.join(STATIC_FILE_PATH, 'static_assets/')
     MEDIA_ROOT = os.path.join(MEDIA_FILE_PATH, 'media_assets/')
-    STATIC_URL = 'static/'
-    MEDIA_URL = 'media/'
+    STATIC_URL = '/static/'
+    MEDIA_URL = '/media/'
+    CUSTOM_DOMAIN="http://localhost:8000"
+
 
 else:  # important, the below code is not finished yet!
     if str(USE_S3) == 'True':
@@ -241,6 +243,7 @@ else:  # important, the below code is not finished yet!
         # STATIC_ROOT = STATIC_URL  # setting before the CDN - keeping this as backup
         STATIC_ROOT = f'https://{AWS_S3_CUSTOM_ROOT}/{AWS_STATIC_LOCATION}'
         STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_STATIC_LOCATION}'
+        CUSTOM_DOMAIN = STATIC_URL
         STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
         DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
