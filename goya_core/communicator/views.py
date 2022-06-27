@@ -223,6 +223,7 @@ def notify_admin(receiving_channel, receiving_token, receiving_message):
     '''
     client = WebClient(token=receiving_token)
     status_result = client.chat_postMessage(channel=receiving_channel, text=receiving_message) 
+    return(status_result)
 
 
 
@@ -277,3 +278,22 @@ def get_slack_bot_installation_store():
             client_id=client_id
         )
     return client_id, installation_store
+
+
+def generic_notify_workspace_admins(message):
+    '''
+    a view to send a generic notification to workspace admins - used for policy changes or service info
+    '''
+    client_id, installation_store = get_slack_bot_installation_store()
+    all_workspaces = SlackInstalledWorkspace.objects.all()
+    # 
+    for workspace in all_workspaces:
+        installation = installation_store.find_installation(enterprise_id=workspace.enterprise_id,team_id=workspace.workspace_id)
+        message_to_workspace_admin = message
+        # notify admin
+        result = notify_admin(installation.user_id, installation.bot_token, message_to_workspace_admin)
+        if result['ok'] != True:
+            # notify superadmin
+            message_to_superadmin = "ERROR on sending " + message+ " to user " + installation.user_id + " On workspace "+workspace.workspace_name
+            installation1 = installation_store.find_installation(enterprise_id="No_Ent_ID",team_id="TNMQGFG4F")
+            notify_admin(installation1.user_id, installation1.bot_token, message_to_superadmin)
