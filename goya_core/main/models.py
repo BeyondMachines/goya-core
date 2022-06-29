@@ -75,3 +75,22 @@ class MailingList(models.Model):  # this is a generic challenge model where all 
     def __str__(self):
         return self.mailing_list_user_email
 
+
+        additional_admin = Additional_Admin()
+        additional_admin.workspace = sent_workspace
+        additional_admin.admin_user_id = sent_user_details.get("id")
+        additional_admin.admin_user_name = sent_user_details.get("name")
+        additional_admin.admin_user_email = sent_user_details.get("email")
+        additional_admin.save()
+
+class Additional_Admin(models.Model):  # this is a generic challenge model where all challenges are picked up from.
+    '''
+    The Additional_Admin model contains the list of additional admins if the same workspace is installed by several admins at different times
+    '''
+    workspace = models.ForeignKey(SlackInstalledWorkspace, blank=False, null=True, on_delete=models.CASCADE)  # may want to validate proper challenge reference
+    admin_user_id = models.CharField(max_length=50, blank=False, null=False)
+    admin_user_name = models.CharField(max_length=200, blank=False, null=False)
+    admin_user_email = models.EmailField(blank=True, null=False)
+    
+    def __str__(self):
+        return self.admin_user_email
