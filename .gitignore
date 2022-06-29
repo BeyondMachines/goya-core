@@ -9,6 +9,7 @@ prototype/
 
 # The local static files populated during collectstatic. 
 static_assets/
+media_assets/
 
 # Zappa packages
 zappa_settings.json*
