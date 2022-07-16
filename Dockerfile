@@ -16,7 +16,7 @@ RUN mkdir -p /app/local_data_store && \
 WORKDIR /app
 
 # Install dependencies
-COPY requirements.txt .
+COPY goya_core/requirements.txt .
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir --quiet -r requirements.txt
 
