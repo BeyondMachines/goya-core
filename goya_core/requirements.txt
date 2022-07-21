@@ -1,6 +1,6 @@
 argcomplete==2.0.0
 asgiref==3.5.0
-backports.zoneinfo==0.2.1
+backports.zoneinfo==0.2.1;python_version<"3.9"
 beautifulsoup4==4.11.1
 bleach==4.1.0
 boto3==1.21.46
@@ -46,7 +46,7 @@ pyflakes==2.4.0
 pyparsing==3.0.8
 python-dateutil==2.8.2
 python-dotenv==0.20.0
-python-Levenshtein==0.12.2
+Levenshtein==0.19.2
 python-slugify==6.1.1
 pytz==2022.1
 pytz-deprecation-shim==0.1.0.post0
