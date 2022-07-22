@@ -1,10 +1,8 @@
-from nis import cat
 from django.views.decorators.http import require_http_methods # To restrict access to views based on the request method 
 from django.conf import settings
 from slack_sdk.oauth.installation_store.sqlite3 import SQLite3InstallationStore
 from slack_sdk.oauth.installation_store.amazon_s3 import AmazonS3InstallationStore
 import boto3
-import os
 from slack_sdk.web import WebClient
 from django.http import HttpResponseBadRequest, HttpResponse
 from django.contrib.admin.views.decorators import staff_member_required
@@ -12,7 +10,6 @@ from markdownify import markdownify as markdown  # to convert html to markdown
 from slack_sdk.errors import SlackApiError
 from datetime import datetime    
 import mixpanel
-from django.db.models import Max, Q, Prefetch, FilteredRelation, Subquery
 from urllib.request import urlopen
 from django.conf import settings
 
