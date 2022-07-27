@@ -181,7 +181,7 @@ def send_potentital_candidates_message_view(request, *args, **kwargs):
     for event in event_count.keys():
         message_to_superadmin += f"*{event_count[event]}* Events contained the keyword *{event}*\n"
 
-    installation1 = installation_store.find_installation(enterprise_id="No_Ent_ID",team_id="T03PBN2FXTR")
+    installation1 = installation_store.find_installation(enterprise_id="No_Ent_ID",team_id="TNMQGFG4F")
     notify_admin(installation1.user_id, installation1.bot_token, message_to_superadmin)
     return HttpResponse("Awareness Sent! Result: ")    
 
