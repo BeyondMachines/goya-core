@@ -1,5 +1,5 @@
 from django.contrib import admin
-from content.models import Advisory, RealLifeEvent, EventSummary, CandidateEvent, AwarenessMessage, AwarenessCategory
+from content.models import Advisory, RealLifeEvent, EventSummary, CandidateEvent, AwarenessMessage, AwarenessCategory, InterestingEventCategory
 
 # Register your models here.
 
@@ -57,3 +57,9 @@ class AwarenessCategoryAdmin(admin.ModelAdmin):
 
 
 admin.site.register(AwarenessCategory, AwarenessCategoryAdmin)
+
+class InterestingEventCategoryAdmin(admin.ModelAdmin):
+    list_display = ('interesting_event_category', 'interesting_event_category_category_id')
+
+
+admin.site.register(InterestingEventCategory, InterestingEventCategoryAdmin)

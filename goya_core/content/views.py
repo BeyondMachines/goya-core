@@ -11,6 +11,10 @@ from fuzzywuzzy import fuzz
 import re
 import datetime
 import json
+from datetime import timedelta
+from django.utils import timezone
+from content.models import CandidateEvent, InterestingEventCategory
+import os
 
 from content.models import CandidateEvent, AwarenessMessage
 # Create your views here.
@@ -84,3 +88,30 @@ def parse_event_candidate(candidate):
     published_day=datetime.datetime.strptime(candidate.published, "%Y-%m-%dT%H:%M:%SZ")
     return(candidate.title, candidate.content[0]['value'], link, published_day)
 
+
+def fetch_events_of_interest():
+    '''
+    Internal Function that retrieves events on interest in a certain time period
+    '''
+    # Fetch the tags of interested added to the Model
+    TAGS_OF_INTEREST = InterestingEventCategory.objects.values('interesting_event_category')
+
+    # Get all events from the last week knowing today's date
+    today = timezone.now()
+    lastweek = today - timedelta(weeks=1)
+
+    # Filter for Events based on the publishing time and tags that have been added. 
+    events = CandidateEvent.objects.filter(candidate_event_published_time__week=lastweek.isocalendar()[1], tags__name__in=TAGS_OF_INTEREST)
+
+    # Storage for Tag Repetition
+    references = {}
+
+    # Events
+    for event in events:
+        # Fetch All the tags in one post
+        found_tags = [tag['name'] for tag in event.tags.values()]
+        # Store the Number of Mentions for each one.
+        for tag in found_tags:
+            references[tag] = references.setdefault(tag, 1) + 1 
+
+    return references

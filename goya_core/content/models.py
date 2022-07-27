@@ -141,3 +141,13 @@ class AwarenessMessage(models.Model):
             self.awareness_message_url = slugify(self.awareness_message_title + '-' + str(random.choices(string.ascii_uppercase + string.digits, k=4)))
         super(AwarenessMessage, self).save(*args, **kwargs)
 
+
+class InterestingEventCategory(models.Model):
+    '''
+    The InterestingEventCategory model contains the tags used to search events that are in the interest of the superadmin.
+    '''
+    interesting_event_category = models.CharField(max_length=200, blank=False, null=False)
+    interesting_event_category_category_id = models.IntegerField(blank=False, null=False, unique=True)
+
+    def __str__(self):
+        return self.interesting_event_category
