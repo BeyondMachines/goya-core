@@ -146,6 +146,7 @@ class ScrapedEvent(models.Model):
     '''
     The ScrapedEvent model containts events scraped from the internet
     '''
+    event_custom_id = models.CharField(max_length=20, blank=False, null=False)
     event_title = models.TextField(blank=False, null=False)
     event_details = RichTextField(blank=True, null=True)
     event_url = models.SlugField(max_length=220, blank=True, null=True)  # the slug text for the url
@@ -160,10 +161,8 @@ class ScrapedEvent(models.Model):
 
     def title_no_spaces(self):
         return re.sub('[^a-zA-Z0-9]', '_', self.event_title)  # use regex to replace anything non alphanumeric with underscore
-        #  return self.challenge_title.replace(" ", "_")
 
     def save(self, *args, **kwargs):  # the autogeneration of the slug for the challenge
         if not self.event_url:
             self.event_url = slugify(self.event_title + '-' + str(random.choices(string.ascii_uppercase + string.digits, k=4)))
         super(ScrapedEvent, self).save(*args, **kwargs)
-
