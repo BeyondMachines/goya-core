@@ -18,6 +18,7 @@ from django.conf import settings
 from content.models import Advisory, RealLifeEvent, EventSummary, AwarenessMessage, AwarenessCategory
 from main.models import SlackInstalledWorkspace
 from communicator.models import Latest_Advisory, Latest_Event_Report, Advisories_Sent, EventSummary_Sent, Latest_Awareness, Awareness_Sent
+from content.views import fetch_events_of_interest
 
 # Create your views here.
 
@@ -166,6 +167,23 @@ def send_awareness_message_view(request, *args, **kwargs):
             installation1 = installation_store.find_installation(enterprise_id="No_Ent_ID",team_id="TNMQGFG4F")
             notify_admin(installation1.user_id, installation1.bot_token, message_to_superadmin)
     return HttpResponse("Awareness Sent! Result: ")
+
+@staff_member_required  # the message is protected. 
+@require_http_methods(["GET"])
+def send_potentital_candidates_message_view(request, *args, **kwargs):
+    '''
+    A view responsible for preparing a Slack Message to be sent
+    '''
+    client_id, installation_store = get_slack_bot_installation_store()
+    message_to_superadmin = "🔊 A Summary for the previous week!\n"
+    
+    event_count = fetch_events_of_interest()
+    for event in event_count.keys():
+        message_to_superadmin += f"*{event_count[event]}* Events contained the keyword *{event}*\n"
+
+    installation1 = installation_store.find_installation(enterprise_id="No_Ent_ID",team_id="TNMQGFG4F")
+    notify_admin(installation1.user_id, installation1.bot_token, message_to_superadmin)
+    return HttpResponse("Awareness Sent! Result: ")    
 
 
 def update_workspace_advisory(workspace,time):

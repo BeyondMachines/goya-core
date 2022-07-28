@@ -17,8 +17,10 @@ from django.contrib import admin
 from django.urls import path, include
 from main.views import home_view, err_handler400, err_handler403, err_handler404, err_handler500, management_view, contact_view
 from slack_app.views import slack_install_view, slack_callback_view, slack_sandbox_invite_view
-from communicator.views import send_advisories_view, send_event_report_view, send_awareness_message_view
+
+from communicator.views import send_advisories_view, send_event_report_view, send_awareness_message_view, send_potentital_candidates_message_view
 from content.views import get_event_candidates_from_rss, list_awareness_message, get_reddit_events
+
 from django.contrib.flatpages import views
 from django.conf import settings
 from django.conf.urls.static import static
@@ -42,6 +44,7 @@ urlpatterns = [
     path('send_advisory/', send_advisories_view, name='send_advisories'),
     path('send_events/', send_event_report_view, name='send_events'),
     path('send_awareness/', send_awareness_message_view, name='send_awareness'),
+    path('send_potentital_candidates_message_view/', send_potentital_candidates_message_view, name="send_potentital_candidates_message_view"),
 
     path('get_event_candidates/', get_event_candidates_from_rss, name='get_event_candidates'),
     path('list_awareness_message/', list_awareness_message, name='list_awareness_message'),
