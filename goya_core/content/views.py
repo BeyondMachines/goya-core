@@ -1,6 +1,7 @@
 from logging import exception
-from django.shortcuts import render
-from django.http import HttpResponseBadRequest, HttpResponse
+import traceback
+from django.shortcuts import get_object_or_404, render
+from django.http import Http404, HttpResponseBadRequest, HttpResponse
 from django.db import IntegrityError
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -11,12 +12,15 @@ from fuzzywuzzy import fuzz
 import re
 import datetime
 import json
+
 from datetime import timedelta
 from django.utils import timezone
 from content.models import CandidateEvent, InterestingEventCategory
 import os
+import requests
+from fake_useragent import UserAgent
 
-from content.models import CandidateEvent, AwarenessMessage
+from content.models import CandidateEvent, AwarenessMessage, ScrapedEvent
 # Create your views here.
 
 @staff_member_required  # the message is protected. 
@@ -115,3 +119,83 @@ def fetch_events_of_interest():
             references[tag] = references.setdefault(tag, 1) + 1 
 
     return references
+
+@staff_member_required  # the message is protected.
+@require_http_methods(["GET"])
+def get_reddit_events(request) -> HttpResponse:
+    '''
+    Gets latest x num of posts on selected subreddit containing the accepted flairs
+    '''
+    try:
+        # Options
+        subreddit = "r/cybersecurity"
+        timespan = "day"    # Options: "day", "week", "month", "all"
+        accepted_flairs = [
+            "News - General",
+            "News - Breaches & Ransoms",
+            "New Vulnerability Disclosure",
+            "Threat Actor TTPs & Alerts",
+        ]
+
+        # URL encoding
+        URL = f"https://www.reddit.com/{subreddit}/search.json?q="
+        for i, flair in enumerate(accepted_flairs):
+            if i == 0:
+                URL += f'flair%3A%22{flair.replace(" ", "%20").replace("&", "%26")}'
+            else:
+                URL += f'%22%20OR%20flair%3A%22{flair.replace(" ", "%20").replace("&", "%26")}'
+        URL += f'%22&restrict_sr=1&sr_nsfw=&sort=top&t={timespan}'
+
+        # Getting data from Reddit
+        ua = UserAgent()
+        response = requests.get(URL, headers={"User-Agent": ua.chrome})
+        response_data = response.json()
+
+        if response.status_code < 200 or response.status_code > 299:
+            print(f"Bad response!\nResponse code:{response.status_code}\nResponse message: {response_data['message']}")
+            return HttpResponse(
+                f"""<h1>Bad response!</h1>
+                Response code: <b>{response.status_code}</b><br>
+                Response message: <b>{response_data['message']}</b>"""
+            )
+
+        posts = [post["data"] for post in response_data["data"]["children"]]
+
+        cnt = 0
+        for post in posts:
+            # Extract data from posts
+            content_id = post["id"]
+            content_title = post["title"]
+            content_flair = post["link_flair_text"].replace("&amp;", "&")
+            content_details = post["selftext"]
+            content_url = f"https://www.reddit.com{post['permalink']}"
+            content_published_time = datetime.datetime.fromtimestamp(post["created_utc"])
+            try:
+                content_additional_data = post["url_overridden_by_dest"]
+            except KeyError:
+                content_additional_data = None
+
+            # Check if post is already in the database
+            try:
+                reddit_event_obj = get_object_or_404(ScrapedEvent, event_custom_id=content_id)
+            except Http404:
+                # Create it if it's not
+                reddit_event_obj = ScrapedEvent.objects.create(event_custom_id=content_id)
+                reddit_event_obj.event_title = content_title
+                reddit_event_obj.event_details = content_details
+                reddit_event_obj.event_url = reddit_event_obj.title_no_spaces()
+                reddit_event_obj.event_source_url = content_url
+                reddit_event_obj.event_published_time = content_published_time
+                reddit_event_obj.event_additional_data = content_additional_data
+                reddit_event_obj.event_source = "Reddit"
+                reddit_event_obj.tags.add(content_flair)
+                reddit_event_obj.save()
+                cnt += 1
+
+    except Exception:
+        tb = traceback.format_exc()
+        print(tb)
+        return HttpResponse(f"<h1>Error!</h1><pre>{tb}</pre>")
+
+    return HttpResponse(f"Getting content from reddit complete<br>Found <b>{cnt}</b> new events")
+
