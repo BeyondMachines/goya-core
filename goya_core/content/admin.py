@@ -1,5 +1,5 @@
 from django.contrib import admin
-from content.models import Advisory, RealLifeEvent, EventSummary, CandidateEvent, AwarenessMessage, AwarenessCategory
+from content.models import Advisory, RealLifeEvent, EventSummary, CandidateEvent, AwarenessMessage, AwarenessCategory, ScrapedEvent
 
 # Register your models here.
 
@@ -57,3 +57,11 @@ class AwarenessCategoryAdmin(admin.ModelAdmin):
 
 
 admin.site.register(AwarenessCategory, AwarenessCategoryAdmin)
+
+
+class ScrapedEventAdmin(admin.ModelAdmin):
+    readonly_fields = ('event_custom_id', 'event_url', 'event_source_url', 'event_additional_data')
+    list_display = ('event_title', 'event_published_time')
+
+
+admin.site.register(ScrapedEvent, ScrapedEventAdmin)
