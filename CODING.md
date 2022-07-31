@@ -58,3 +58,15 @@ git filter-branch --force --index-filter \
     "git rm --cached --ignore-unmatch <your-file>" \
     --prune-empty --tag-name-filter cat -- --all
 ```
+
+### Updating python libraries:
+
+To check which libraries should be updated: `pip list --outdated`
+To upgrade a library: `pip install --upgrade library_name`
+
+
+### Using multiple github accounts on a single computer helper
+Github using ssh helper (if you use multiple accounts on a single machine)
+https://medium.com/p/8e7970c8fd46#4373
+
+
