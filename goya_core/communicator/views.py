@@ -145,7 +145,7 @@ def send_awareness_message_view(request, *args, **kwargs):
             message_text = message_text + "*"+next_message.awareness_message_title+"*" + spacer_line + markdown(next_message.awareness_message_details) + spacer_line + takeaway_line + "```"+next_message.awareness_message_takeway +"```"
             try:
                 if next_message.awareness_message_image:
-                    image_url = settings.CUSTOM_DOMAIN+next_message.awareness_message_image.url
+                    image_url = next_message.awareness_message_image.url
                     f = urlopen(image_url)
                     file_name = f.read()
                     client.files_upload(channels='#'+workspace.workspace_default_channel, initial_comment=message_text, file=file_name)
