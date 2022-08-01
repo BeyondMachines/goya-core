@@ -19,7 +19,7 @@ from main.views import home_view, err_handler400, err_handler403, err_handler404
 from slack_app.views import slack_install_view, slack_callback_view, slack_sandbox_invite_view
 
 from communicator.views import send_advisories_view, send_event_report_view, send_awareness_message_view, send_potentital_candidates_message_view
-from content.views import get_event_candidates_from_rss, list_awareness_message, get_reddit_events
+from content.views import get_event_candidates_from_rss, list_awareness_message, get_reddit_events, get_cisa_events
 
 from django.contrib.flatpages import views
 from django.conf import settings
@@ -49,6 +49,7 @@ urlpatterns = [
     path('get_event_candidates/', get_event_candidates_from_rss, name='get_event_candidates'),
     path('list_awareness_message/', list_awareness_message, name='list_awareness_message'),
     path('get_reddit_events/', get_reddit_events, name='get_reddit_events'),
+    path('get_cisa_events/', get_cisa_events, name='get_cisa_events'),
 
     #  path('slack/design', design_page_view, name='design'),
     # below are the flatpages content objects
