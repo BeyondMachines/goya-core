@@ -68,7 +68,7 @@ admin.site.register(InterestingEventCategory, InterestingEventCategoryAdmin)
 
 class ScrapedEventAdmin(admin.ModelAdmin):
     readonly_fields = ('event_custom_id', 'event_url', 'event_source_url', 'event_additional_data')
-    list_display = ('event_title', 'event_published_time')
+    list_display = ('event_title', 'event_published_time', 'event_source')
 
 
 admin.site.register(ScrapedEvent, ScrapedEventAdmin)

@@ -19,6 +19,7 @@ from content.models import CandidateEvent, InterestingEventCategory
 import os
 import requests
 from fake_useragent import UserAgent
+from bs4 import BeautifulSoup
 
 from content.models import CandidateEvent, AwarenessMessage, ScrapedEvent
 # Create your views here.
@@ -120,6 +121,7 @@ def fetch_events_of_interest():
 
     return references
 
+
 @staff_member_required  # the message is protected.
 @require_http_methods(["GET"])
 def get_reddit_events(request) -> HttpResponse:
@@ -199,3 +201,66 @@ def get_reddit_events(request) -> HttpResponse:
 
     return HttpResponse(f"Getting content from reddit complete<br>Found <b>{cnt}</b> new events")
 
+
+@staff_member_required  # the message is protected.
+@require_http_methods(["GET"])
+def get_cisa_events(request) -> HttpResponse:
+    '''
+    Gets latest CISA events
+    '''
+    try:
+        # Options
+        LIMIT = 5   # How many events to get
+
+        # Getting data
+        ua = UserAgent()
+        URL = "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json"
+        response = requests.get(URL, headers={"User-Agent": ua.chrome})
+        # Getting vulnerabilities and sorting them descending
+        vulnerabilities = response.json()["vulnerabilities"][::-1]
+
+        cnt = 0
+        for i, vulnerability in enumerate(vulnerabilities):
+            if i == LIMIT:
+                break
+            # Extracting content
+            content_id = vulnerability["cveID"]
+            content_product = vulnerability["product"]
+            content_title = vulnerability["vulnerabilityName"]
+            content_published_time = vulnerability["dateAdded"]
+            content_details = vulnerability["shortDescription"]
+            content_actions = vulnerability["requiredAction"]
+            content_url = f"https://nvd.nist.gov/vuln/detail/{content_id}"
+            content_additional_data = vulnerability["notes"]
+
+            content_details = f"""
+<b>Product:</b> {content_product}<br>
+<b>Vulnerability:</b> {content_title}<br>
+<b>Description:</b> {content_details}<br>
+<b>Recommended action:</b> {content_actions}<br>
+            """
+
+            # Check if post is already in the database
+            try:
+                cisa_event_obj = get_object_or_404(ScrapedEvent, event_custom_id=content_id)
+            except Http404:
+                # Create it if it's not
+                cisa_event_obj = ScrapedEvent.objects.create(event_custom_id=content_id)
+                cisa_event_obj.event_title = content_title
+                cisa_event_obj.event_details = content_details
+                cisa_event_obj.event_url = cisa_event_obj.title_no_spaces()
+                cisa_event_obj.event_source_url = content_url
+                cisa_event_obj.event_published_time = content_published_time
+                cisa_event_obj.event_additional_data = content_additional_data
+                cisa_event_obj.event_source = "CISA"
+                cisa_event_obj.tags.add(content_product)
+                cisa_event_obj.save()
+                cnt += 1
+
+    # Catch if something goes wrong
+    except Exception:
+        tb = traceback.format_exc()
+        print(tb)
+        return HttpResponse(f"<h1>Error!</h1><pre>{tb}</pre>")
+
+    return HttpResponse(f"Getting content from CISA complete<br>Found <b>{cnt}</b> new events")
