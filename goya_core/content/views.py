@@ -125,6 +125,16 @@ def fetch_events_of_interest():
 @staff_member_required  # the message is protected.
 @require_http_methods(["GET"])
 def get_reddit_events(request) -> HttpResponse:
+    return internal_get_reddit_events()
+
+
+@staff_member_required  # the message is protected.
+@require_http_methods(["GET"])
+def get_cisa_events(request) -> HttpResponse:
+    return internal_get_cisa_events()
+
+
+def internal_get_reddit_events() -> HttpResponse:
     '''
     Gets latest x num of posts on selected subreddit containing the accepted flairs
     '''
@@ -202,9 +212,7 @@ def get_reddit_events(request) -> HttpResponse:
     return HttpResponse(f"Getting content from reddit complete<br>Found <b>{cnt}</b> new events")
 
 
-@staff_member_required  # the message is protected.
-@require_http_methods(["GET"])
-def get_cisa_events(request) -> HttpResponse:
+def internal_get_cisa_events() -> HttpResponse:
     '''
     Gets latest CISA events
     '''
